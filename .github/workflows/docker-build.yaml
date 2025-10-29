@@ -77,6 +77,6 @@ jobs:
           ref: ${{ github.ref }}
           component: ${{ toJson(matrix.component) }}
           platforms: ${{ needs.load-docker-build-components.outputs.platforms }}
-          dry-run: true
+          dry-run: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
