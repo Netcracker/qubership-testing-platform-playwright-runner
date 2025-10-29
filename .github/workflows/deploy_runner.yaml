@@ -69,7 +69,8 @@ jobs:
 
       - name: Install Playwright Runner
         run: |
-          helm install --namespace=playwright-runner --create-namespace -f ./deployments/charts/atp3-playwright-runner/values.yaml consul-service ./deployments/charts/atp3-playwright-runner --set DOCKER_TAG="ghcr.io/netcracker/qubership-testing-platform-playwright-runner:build_process_latest"
+          ls -l
+          helm install --namespace=playwright-runner --create-namespace -f /deployments/charts/atp3-playwright-runner/values.yaml atp3-playwright-runner /deployments/charts/atp3-playwright-runner --set DOCKER_TAG="ghcr.io/netcracker/qubership-testing-platform-playwright-runner:build_process_latest"
 
       - name: Get docker images
         shell: bash
