@@ -1,18 +1,4 @@
 #!/bin/bash
-# # Copyright 2024-2025 NetCracker Technology Corporation
-# #
-# # Licensed under the Apache License, Version 2.0 (the "License");
-# # you may not use this file except in compliance with the License.
-# # You may obtain a copy of the License at
-# #
-# #      http://www.apache.org/licenses/LICENSE-2.0
-# #
-# # Unless required by applicable law or agreed to in writing, software
-# # distributed under the License is distributed on an "AS IS" BASIS,
-# # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# # See the License for the specific language governing permissions and
-# # limitations under the License.
-
 
 # Calculate Test Pass Rate from Allure Results
 # 
@@ -93,21 +79,21 @@ for result_file in "$ALLURE_RESULTS_DIR"/*-result.json; do
             "passed")
                 passed_tests=$((passed_tests + 1))
                 log_success "✓ $test_name"
-                test_details+=("$(printf "%-12s" "✅ PASSED") | $(printf "%-60s" "$test_name")")
+                test_details+=("✅ PASSED | $test_name")
                 ;;
             "failed")
                 failed_tests=$((failed_tests + 1))
                 log_error "✗ $test_name"
-                test_details+=("$(printf "%-12s" "❌ FAILED") | $(printf "%-60s" "$test_name")")
+                test_details+=("❌ FAILED | $test_name")
                 ;;
             "skipped")
                 skipped_tests=$((skipped_tests + 1))
                 log_warning "⚠ $test_name"
-                test_details+=("$(printf "%-12s" "⚠️ SKIPPED") | $(printf "%-60s" "$test_name")")
+                test_details+=("⚠️ SKIPPED | $test_name")
                 ;;
             *)
                 log_warning "? $test_name (status: $status)"
-                test_details+=("$(printf "%-12s" "❓ UNKNOWN") | $(printf "%-60s" "$test_name")")
+                test_details+=("❓ UNKNOWN | $test_name")
                 ;;
         esac
         

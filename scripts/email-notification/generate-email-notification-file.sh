@@ -1,18 +1,4 @@
 #!/bin/bash
-# # Copyright 2024-2025 NetCracker Technology Corporation
-# #
-# # Licensed under the Apache License, Version 2.0 (the "License");
-# # you may not use this file except in compliance with the License.
-# # You may obtain a copy of the License at
-# #
-# #      http://www.apache.org/licenses/LICENSE-2.0
-# #
-# # Unless required by applicable law or agreed to in writing, software
-# # distributed under the License is distributed on an "AS IS" BASIS,
-# # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# # See the License for the specific language governing permissions and
-# # limitations under the License.
-
 
 # Generate Message from Template (Final Simplified Version)
 # 
@@ -89,8 +75,8 @@ generate_email_notification_file() {
     # Set default values for optional variables
     EXECUTION_DATE="${EXECUTION_DATE:-$(date '+%Y-%m-%d %H:%M:%S')}"
     TEST_COVERAGE="${TEST_COVERAGE:-100.00}"
-    REPORT_VIEW_HOST_URL="${REPORT_VIEW_HOST_URL:-https://example.com}"
-    ALLURE_REPORT_URL="${REPORT_VIEW_HOST_URL}/Report/${ENV_NAME}/${CURRENT_DATE}/${CURRENT_TIME}/allure-report/index.html"
+    ATP_REPORT_VIEW_UI_URL="${ATP_REPORT_VIEW_UI_URL:-https://example.com}"
+    ALLURE_REPORT_URL="${ATP_REPORT_VIEW_UI_URL}/Report/${ENVIRONMENT_NAME}/${CURRENT_DATE}/${CURRENT_TIME}/allure-report/index.html"
     TIMESTAMP="${TIMESTAMP:-$(date '+%Y-%m-%d %H:%M:%S UTC')}"
 
     # Read template content
@@ -108,8 +94,8 @@ generate_email_notification_file() {
         -v failure_rate="$TEST_FAILURE_RATE" \
         -v coverage="$TEST_COVERAGE" \
         -v exec_date="$EXECUTION_DATE" \
-        -v env_name="${ENV_NAME:-Unknown}" \
-        -v report_host_url="$REPORT_VIEW_HOST_URL" \
+        -v environment_name="${ENVIRONMENT_NAME:-Unknown}" \
+        -v report_host_url="$ATP_REPORT_VIEW_UI_URL" \
         -v allure_report_url="$ALLURE_REPORT_URL" \
         -v timestamp="$TIMESTAMP" '
         BEGIN {
@@ -178,8 +164,8 @@ generate_email_notification_file() {
             gsub(/{{TEST_FAILURE_RATE}}/, failure_rate)
             gsub(/{{TEST_COVERAGE}}/, coverage)
                     gsub(/{{EXECUTION_DATE}}/, exec_date)
-        gsub(/{{ENV_NAME}}/, env_name)
-                gsub(/{{REPORT_VIEW_HOST_URL}}/, report_host_url)
+        gsub(/{{ENVIRONMENT_NAME}}/, environment_name)
+                gsub(/{{ATP_REPORT_VIEW_UI_URL}}/, report_host_url)
         gsub(/{{ALLURE_REPORT_URL}}/, allure_report_url)
         gsub(/{{TIMESTAMP}}/, timestamp)
             

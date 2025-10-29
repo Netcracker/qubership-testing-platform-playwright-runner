@@ -17,6 +17,7 @@ The test execution process is divided into modular components that can be easily
 - **`runtime-setup.sh`** - Runtime-specific environment setup
 - **`test-runner.sh`** - Test execution and results collection (clears sensitive vars)
 - **`upload-monitor.sh`** - Event-based upload monitoring and finalization
+- **`native-report.sh`** - Save native runner report to attachments folder
 
 ### Runtime-Specific Modules
 
@@ -142,20 +143,20 @@ ENTRYPOINT ["/entrypoint.sh"]
 ## Environment Variables
 
 ### Required Variables
-- `GIT_REPO_URL` - Git repository URL
-- `GIT_BRANCH` - Branch to clone
-- `GIT_TOKEN` - Git access token
-- `S3_BUCKET` - S3 bucket name
-- `S3_ACCESS_KEY` - S3 access key
-- `S3_SECRET_KEY` - S3 secret key
-- `ENV_NAME` - Environment name
-- `S3_TYPE` - Storage type (`aws` or `minio`)
+- `ATP_TESTS_GIT_REPO_URL` - Git repository URL
+- `ATP_TESTS_GIT_REPO_BRANCH` - Branch to clone
+- `ATP_TESTS_GIT_TOKEN` - Git access token
+- `ATP_STORAGE_BUCKET` - S3 bucket name
+- `ATP_STORAGE_USERNAME` - S3 access key
+- `ATP_STORAGE_PASSWORD` - S3 secret key
+- `ENVIRONMENT_NAME` - Environment name
+- `ATP_STORAGE_PROVIDER` - Storage type (`aws` or `minio` or `s3`)
 
 ### Optional Variables
 - `CURRENT_DATE` - Override current date
 - `CURRENT_TIME` - Override current time
-- `S3_API_HOST` - MinIO API host
-- `S3_UI_URL` - S3 UI URL
+- `ATP_STORAGE_SERVER_URL` - MinIO API host
+- `ATP_STORAGE_SERVER_UI_URL` - S3 UI URL
 - `PAUSE_BEFORE_END` - Pause before container exit
 - `UPLOAD_METHOD` - Upload method: `cp` (file-based) or `sync` (directory-based, triggered by inotifywait)
 
