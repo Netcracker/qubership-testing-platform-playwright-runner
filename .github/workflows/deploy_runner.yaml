@@ -45,12 +45,13 @@ jobs:
       - name: Create Kubernetes Cluster
         uses: ./qubership-test-pipelines/actions/shared/create_cluster
 
-      - name: Checkout pipeline
+      - name: Checkout Code
         uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.pipeline_branch }}
-          repository: 'Netcracker/qubership-testing-platform-playwright-runner'
-          path: 'qubership-testing-platform-playwright-runner'
+
+      - name: Listing downloaded files
+        run: |
+          pwd
+          ls -R ./
 
       - name: Setup kubectl
         uses: azure/setup-kubectl@v3
