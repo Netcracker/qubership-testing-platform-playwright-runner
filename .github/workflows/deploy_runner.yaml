@@ -1,13 +1,31 @@
 name: Run Playwright Runner Installation
 
+#on:
+#  workflow_dispatch:
+#    inputs:
+#      pipeline_branch:
+#        description: 'Test pipeline branch name'
+#        type: string
+#        required: true
+#        default: 'main'
+
 on:
-  workflow_dispatch:
-    inputs:
-      pipeline_branch:
-        description: 'Test pipeline branch name'
-        type: string
-        required: true
-        default: 'main'
+  push:
+    branches-ignore:
+      - "**release*"
+      - "prettier/**"
+      - "dependabot/**"
+    paths-ignore:
+      - "docs/**"
+      - "README.md"
+      - ".github/**"
+  workflow_dispatch: {}
+  pull_request:
+    branches: [main]
+    types:
+      [opened, reopened, synchronize]
+
+permissions: {}
 
 
 jobs:
