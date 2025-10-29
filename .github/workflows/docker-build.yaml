@@ -81,7 +81,7 @@ jobs:
         uses: netcracker/qubership-workflow-hub/actions/docker-action@main
         with:
           ref: ${{ github.ref }}
-          tags: ${{steps.metadata.outputs.result}},${{ github.ref }}_latest
+          tags: ${{steps.metadata.outputs.result}},${{ github.ref_name }}_latest
           component: ${{ toJson(matrix.component) }}
           platforms: ${{ needs.load-docker-build-components.outputs.platforms }}
           dry-run: false
