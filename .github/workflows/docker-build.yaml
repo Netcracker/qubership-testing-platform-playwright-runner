@@ -71,10 +71,17 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Metadata
+        id: metadata
+        uses: netcracker/qubership-workflow-hub/actions/metadata-action@9319676b7d20b423a2e0943a0ac08da07d615998 #v1.0.6
+        with:
+          default-template: '{{ref-name}}-{{timestamp}}'
+
       - name: Build and Publish Docker Image
         uses: netcracker/qubership-workflow-hub/actions/docker-action@main
         with:
           ref: ${{ github.ref }}
+          tags: ${{steps.metadata.outputs.result}},${{ github.ref }}_latest
           component: ${{ toJson(matrix.component) }}
           platforms: ${{ needs.load-docker-build-components.outputs.platforms }}
           dry-run: false
