@@ -76,7 +76,42 @@ jobs:
       - name: Get docker images
         shell: bash
         run: |
-          # ▶️ Get docker images
-          sleep  15s
+          echo "▶️ Checking pods in namespace playwright-runner"
+          sleep 15s
+      
           kubectl get pods -n playwright-runner
+      
+          echo "Docker images:"
           kubectl get pods -n playwright-runner -o go-template --template="{{range .items}}{{range .spec.containers}}{{.image}} {{end}}{{end}}"
+          echo
+      
+          echo "Waiting for pod to complete..."
+          timeout=600
+          start_time=$(date +%s)
+      
+          pod=$(kubectl get pods -n playwright-runner --no-headers -o custom-columns=":metadata.name" | grep -vE '^playwright-runner' | head -n 1)
+          echo "Tracking pod: $pod"
+      
+          while true; do
+            phase=$(kubectl get pod "$pod" -n playwright-runner -o jsonpath='{.status.phase}' 2>/dev/null || echo "Unknown")
+            
+            if [[ "$phase" == "Succeeded" ]]; then
+              echo "✅ Pod $pod succeeded"
+              exit 0
+            elif [[ "$phase" == "Failed" ]]; then
+              echo "❌ Pod $pod failed"
+              kubectl logs "$pod" -n playwright-runner --tail=50 || true
+              exit 1
+            fi
+            
+            now=$(date +%s)
+            elapsed=$(( now - start_time ))
+            if (( elapsed > timeout )); then
+              echo "❌ Timeout waiting for pod $pod to succeed after ${timeout}s"
+              kubectl logs "$pod" -n playwright-runner --tail=50 || true
+              exit 1
+            fi
+            
+            echo "⏳ Pod phase: $phase (elapsed: ${elapsed}s)"
+            sleep 10
+          done
