@@ -45,8 +45,12 @@ jobs:
       - name: Create Kubernetes Cluster
         uses: ./qubership-test-pipelines/actions/shared/create_cluster
 
-      - name: Checkout Code
+      - name: Checkout pipeline
         uses: actions/checkout@v4
+        with:
+          ref: 'main'
+          repository: 'kagw95/qubership-consul'
+          path: 'qubership-consul'
 
       - name: Listing downloaded files
         run: |
@@ -68,50 +72,71 @@ jobs:
           kubectl create ns playwright-runner
           kubectl get namespaces
 
-      - name: Install Playwright Runner
+      - name: Install Consul
         run: |
-          ls -l
-          helm install --namespace=playwright-runner --create-namespace -f ./deployments/charts/atp3-playwright-runner/values.yaml -f ./deployments/charts/atp3-playwright-runner/resource-profiles/dev.yaml atp3-playwright-runner ./deployments/charts/atp3-playwright-runner --set DOCKER_TAG="ghcr.io/netcracker/qubership-testing-platform-playwright-runner:build_process_latest"
+          echo  "Namespace to install: consul-ns" 
+          helm install --namespace=consul-ns --create-namespace -f ./qubership-consul/charts/helm/consul-service/values.yaml consul-service ./qubership-consul/charts/helm/consul-service
 
-      - name: Get docker images
+      - name: Check Consul Status
         shell: bash
         run: |
-          echo "▶️ Checking pods in namespace playwright-runner"
-          sleep 15s
-      
-          kubectl get pods -n playwright-runner
-      
-          echo "Docker images:"
-          kubectl get pods -n playwright-runner -o go-template --template="{{range .items}}{{range .spec.containers}}{{.image}} {{end}}{{end}}"
-          echo
-      
-          echo "Waiting for pod to complete..."
-          timeout=600
-          start_time=$(date +%s)
-      
-          pod=$(kubectl get pods -n playwright-runner --no-headers -o custom-columns=":metadata.name" | grep -vE '^playwright-runner' | head -n 1)
-          echo "Tracking pod: $pod"
-      
-          while true; do
-            phase=$(kubectl get pod "$pod" -n playwright-runner -o jsonpath='{.status.phase}' 2>/dev/null || echo "Unknown")
-            
-            if [[ "$phase" == "Succeeded" ]]; then
-              echo "✅ Pod $pod succeeded"
-              exit 0
-            elif [[ "$phase" == "Failed" ]]; then
-              echo "❌ Pod $pod failed"
-              kubectl logs "$pod" -n playwright-runner --tail=50 || true
-              exit 1
-            fi
-            
-            now=$(date +%s)
-            elapsed=$(( now - start_time ))
-            if (( elapsed > timeout )); then
-              echo "❌ Timeout waiting for pod $pod to succeed after ${timeout}s"
-              kubectl logs "$pod" -n playwright-runner --tail=50 || true
-              exit 1
-            fi
-            
-            echo "⏳ Pod phase: $phase (elapsed: ${elapsed}s)"
-            sleep 10
-          done
+          sleep 30s
+          kubectl get pods -n consul-ns
+          pod=$(kubectl get pods -n consul-ns -o name | grep -vE 'consul-' | head -n 1 | cut -d/ -f2)
+          kubectl wait pod "$pod" -n consul-ns \
+          --for=condition=Ready \
+          --timeout=600s || {
+          echo "❌ Pod $pod did not become ready in time"
+          exit 1
+          }
+
+#      - name: Checkout Code
+#        uses: actions/checkout@v4
+#
+#      - name: Install Playwright Runner
+#        run: |
+#          ls -l
+#          helm install --namespace=playwright-runner --create-namespace -f ./deployments/charts/atp3-playwright-runner/values.yaml -f ./deployments/charts/atp3-playwright-runner/resource-profiles/dev.yaml atp3-playwright-runner ./deployments/charts/atp3-playwright-runner --set DOCKER_TAG="ghcr.io/netcracker/qubership-testing-platform-playwright-runner:build_process_latest"
+#
+#      - name: Get docker images
+#        shell: bash
+#        run: |
+#          echo "▶️ Checking pods in namespace playwright-runner"
+#          sleep 15s
+#
+#          kubectl get pods -n playwright-runner
+#
+#          echo "Docker images:"
+#          kubectl get pods -n playwright-runner -o go-template --template="{{range .items}}{{range .spec.containers}}{{.image}} {{end}}{{end}}"
+#          echo
+#
+#          echo "Waiting for pod to complete..."
+#          timeout=600
+#          start_time=$(date +%s)
+#
+#          pod=$(kubectl get pods -n playwright-runner --no-headers -o custom-columns=":metadata.name" | grep -vE '^playwright-runner' | head -n 1)
+#          echo "Tracking pod: $pod"
+#
+#          while true; do
+#            phase=$(kubectl get pod "$pod" -n playwright-runner -o jsonpath='{.status.phase}' 2>/dev/null || echo "Unknown")
+#
+#            if [[ "$phase" == "Succeeded" ]]; then
+#              echo "✅ Pod $pod succeeded"
+#              exit 0
+#            elif [[ "$phase" == "Failed" ]]; then
+#              echo "❌ Pod $pod failed"
+#              kubectl logs "$pod" -n playwright-runner --tail=50 || true
+#              exit 1
+#            fi
+#
+#            now=$(date +%s)
+#            elapsed=$(( now - start_time ))
+#            if (( elapsed > timeout )); then
+#              echo "❌ Timeout waiting for pod $pod to succeed after ${timeout}s"
+#              kubectl logs "$pod" -n playwright-runner --tail=50 || true
+#              exit 1
+#            fi
+#
+#            echo "⏳ Pod phase: $phase (elapsed: ${elapsed}s)"
+#            sleep 15
+#          done
