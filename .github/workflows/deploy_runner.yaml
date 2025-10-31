@@ -82,13 +82,15 @@ jobs:
         run: |
           sleep 30s
           kubectl get pods -n consul-ns
-          pod=$(kubectl get pods -n consul-ns -o name | grep -vE 'consul-' | head -n 1 | cut -d/ -f2)
+          pod=$(kubectl get pods -n consul-ns -o name | grep -vE 'server' | head -n 1 | cut -d/ -f2)
+          echo "Start checking consul-server pod: $pod"
           kubectl wait pod "$pod" -n consul-ns \
-          --for=condition=Ready \
-          --timeout=600s || {
-          echo "❌ Pod $pod did not become ready in time"
-          exit 1
+            --for=condition=Ready \
+            --timeout=600s || {
+            echo "❌ Pod $pod did not become ready in time"
+            exit 1
           }
+          kubectl get secrets -n consul-ns
 
 #      - name: Checkout Code
 #        uses: actions/checkout@v4
