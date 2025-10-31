@@ -80,9 +80,9 @@ jobs:
       - name: Check Consul Status
         shell: bash
         run: |
-          sleep 30s
+          sleep 15s
           kubectl get pods -n consul-ns
-          pod=$(kubectl get pods -n consul-ns -o name | grep -vE 'server' | head -n 1 | cut -d/ -f2)
+          pod=$(kubectl get pods -n consul-ns --no-headers -o custom-columns=":metadata.name" | grep '^consul-server' | head -n 1)
           echo "Start checking consul-server pod: $pod"
           kubectl wait pod "$pod" -n consul-ns \
             --for=condition=Ready \
@@ -91,6 +91,9 @@ jobs:
             exit 1
           }
           kubectl get secrets -n consul-ns
+          kubectl get secret consul-bootstrap-acl-token -n consul-ns -o jsonpath='{.data}' \
+            | jq -r 'to_entries[] | "\(.key): \(.value | @base64d)"'
+
 
 #      - name: Checkout Code
 #        uses: actions/checkout@v4
