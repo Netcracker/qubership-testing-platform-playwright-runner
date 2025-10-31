@@ -75,7 +75,7 @@ jobs:
       - name: Install Consul
         run: |
           echo  "Namespace to install: consul-ns" 
-          helm install --namespace=consul-ns --create-namespace -f ./qubership-consul/charts/helm/consul-service/values.yaml consul-service ./qubership-consul/charts/helm/consul-service
+          helm install --namespace=consul-ns --create-namespace -f ./qubership-consul/charts/helm/consul-service/values.yaml consul-service ./qubership-consul/charts/helm/consul-service  --set monitoring.enabled=false
 
       - name: Check Consul Status
         shell: bash
