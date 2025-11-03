@@ -127,7 +127,7 @@ jobs:
             --set "CURRENT_DATE=$CURRENT_DATE" \
             --set "CURRENT_TIME=$CURRENT_TIME" \
             --set "ENVIRONMENT_NAME=test" \
-            --set "TEST_PARAMS={\"execution_list\":[{\"type\":\"scope\",\"name\":\"pipeline_job\"}]}"
+            --set-json 'TEST_PARAMS={"execution_list":[{"type":"scope","name":"pipeline_job"}]}'
 
 
       - name: Get docker images
