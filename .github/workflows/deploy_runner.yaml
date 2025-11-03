@@ -102,7 +102,27 @@ jobs:
       - name: Install Playwright Runner
         run: |
           ls -l
-          helm install --namespace=playwright-runner --create-namespace -f ./deployments/charts/atp3-playwright-runner/values.yaml -f ./deployments/charts/atp3-playwright-runner/resource-profiles/dev.yaml atp3-playwright-runner ./deployments/charts/atp3-playwright-runner --set DOCKER_TAG="ghcr.io/netcracker/qubership-testing-platform-playwright-runner:build_process_latest" --set ATP_RUNNER_JOB_EXIT_STRATEGY=$CONSUL_TOKEN --set ATP_RUNNER_JOB_EXIT_STRATEGY=$CONSUL_TOKEN 
+          CURRENT_DATE=$(date +'%Y-%m-%d')
+          CURRENT_TIME=$(date +'%H-%M-%S')
+          helm install --namespace=playwright-runner --create-namespace \
+            -f ./deployments/charts/atp3-playwright-runner/values.yaml \
+            -f ./deployments/charts/atp3-playwright-runner/resource-profiles/dev.yaml atp3-playwright-runner ./deployments/charts/atp3-playwright-runner \
+            --set DOCKER_TAG="ghcr.io/netcracker/qubership-testing-platform-playwright-runner:build_process_latest" \
+            --set ATP_RUNNER_JOB_EXIT_STRATEGY=$CONSUL_TOKEN \
+            --set ATP_REPORT_VIEW_UI_URL=https://atp3-results.test \
+            --set ATP_STORAGE_BUCKET=qstp-consul \
+            --set ATP_STORAGE_PASSWORD=${{ secrets.ATP_STORAGE_PASSWORD }} \
+            --set ATP_STORAGE_PROVIDER=s3 \
+            --set ATP_STORAGE_SERVER_UI_URL=https://console.s3.amazonaws.com \
+            --set ATP_STORAGE_SERVER_URL=https://s3.amazonaws.com \
+            --set ATP_STORAGE_USERNAME=${{ secrets.ATP_STORAGE_USERNAME }} \
+            --set ATP_TESTS_GIT_REPO_BRANCH=main \
+            --set ATP_TESTS_GIT_REPO_URL=https://github.com/kagw95/qubership-consul-playwright-tests.git \
+            --set ATP_TESTS_GIT_TOKEN=${{ secrets.ATP_TESTS_GIT_TOKEN }} \
+            --set CURRENT_DATE=$CURRENT_DATE \
+            --set CURRENT_TIME=$CURRENT_TIME \
+            --set ENVIRONMENT_NAME=test \
+            --set TEST_PARAMS='{"execution_list":[{"type": "scope","name": "pipeline_job"}]}'
 
       - name: Get docker images
         shell: bash
