@@ -151,13 +151,14 @@ jobs:
 
           while true; do
             phase=$(kubectl get pod "$pod" -n playwright-runner -o jsonpath='{.status.phase}' 2>/dev/null || echo "Unknown")
-
+          
             if [[ "$phase" == "Succeeded" ]]; then
               echo "✅ Pod $pod succeeded"
+              kubectl logs "$pod" -n playwright-runner --tail=500 || true
               exit 0
             elif [[ "$phase" == "Failed" ]]; then
               echo "❌ Pod $pod failed"
-              kubectl logs "$pod" -n playwright-runner --tail=50 || true
+              kubectl logs "$pod" -n playwright-runner --tail=500 || true
               exit 1
             fi
 
