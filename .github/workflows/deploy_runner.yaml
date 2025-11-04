@@ -121,7 +121,7 @@ jobs:
             --set "ATP_STORAGE_SERVER_UI_URL=https://console.s3.amazonaws.com" \
             --set "ATP_STORAGE_SERVER_URL=https://s3.amazonaws.com" \
             --set "ATP_STORAGE_USERNAME=${{ secrets.ATP_STORAGE_USERNAME }}" \
-            --set "ATP_TESTS_GIT_REPO_BRANCH=main" \
+            --set "ATP_TESTS_GIT_REPO_BRANCH=test" \
             --set "ATP_TESTS_GIT_REPO_URL=https://github.com/kagw95/qubership-consul-playwright-tests.git" \
             --set "ATP_TESTS_GIT_TOKEN=${{ secrets.ATP_TESTS_GIT_TOKEN }}" \
             --set "CURRENT_DATE=$CURRENT_DATE" \
