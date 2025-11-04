@@ -95,6 +95,7 @@ jobs:
           token=$(kubectl get secret consul-bootstrap-acl-token -n consul-ns -o jsonpath='{.data.token}' | base64 --decode)
           echo "Consul Token: $token"
           echo "CONSUL_TOKEN=$token" >> $GITHUB_ENV
+          kubectl get services -n consul-ns
 
       - name: Checkout Code
         uses: actions/checkout@v4
