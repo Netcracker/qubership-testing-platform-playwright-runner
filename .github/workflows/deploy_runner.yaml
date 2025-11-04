@@ -69,8 +69,6 @@ jobs:
         run: |
           kubectl version --client
           helm version
-          kubectl create ns playwright-runner
-          kubectl get namespaces
 
       - name: Install Consul
         run: |
@@ -109,7 +107,7 @@ jobs:
           echo "CURRENT_DATE=$CURRENT_DATE"
           echo "CURRENT_TIME=$CURRENT_TIME"
           
-          helm install --namespace=playwright-runner --create-namespace \
+          helm install --namespace=consul-ns --create-namespace \
             -f ./deployments/charts/atp3-playwright-runner/values.yaml \
             -f ./deployments/charts/atp3-playwright-runner/resource-profiles/dev.yaml \
             atp3-playwright-runner ./deployments/charts/atp3-playwright-runner \
@@ -134,32 +132,32 @@ jobs:
       - name: Get docker images
         shell: bash
         run: |
-          echo "▶️ Checking pods in namespace playwright-runner"
+          echo "▶️ Checking pods in namespace consul-ns"
           sleep 15s
 
-          kubectl get pods -n playwright-runner
+          kubectl get pods -n consul-ns
 
           echo "Docker images:"
-          kubectl get pods -n playwright-runner -o go-template --template="{{range .items}}{{range .spec.containers}}{{.image}} {{end}}{{end}}"
+          kubectl get pods -n consul-ns -o go-template --template="{{range .items}}{{range .spec.containers}}{{.image}} {{end}}{{end}}"
           echo
 
           echo "Waiting for pod to complete..."
           timeout=600
           start_time=$(date +%s)
 
-          pod=$(kubectl get pods -n playwright-runner --no-headers -o custom-columns=":metadata.name" | grep -vE '^playwright-runner' | head -n 1)
+          pod=$(kubectl get pods -n consul-ns --no-headers -o custom-columns=":metadata.name" | grep -vE '^playwright-runner' | head -n 1)
           echo "Tracking pod: $pod"
 
           while true; do
-            phase=$(kubectl get pod "$pod" -n playwright-runner -o jsonpath='{.status.phase}' 2>/dev/null || echo "Unknown")
+            phase=$(kubectl get pod "$pod" -n consul-ns -o jsonpath='{.status.phase}' 2>/dev/null || echo "Unknown")
           
             if [[ "$phase" == "Succeeded" ]]; then
               echo "✅ Pod $pod succeeded"
-              kubectl logs "$pod" -n playwright-runner --tail=500 || true
+              kubectl logs "$pod" -n consul-ns --tail=500 || true
               exit 0
             elif [[ "$phase" == "Failed" ]]; then
               echo "❌ Pod $pod failed"
-              kubectl logs "$pod" -n playwright-runner --tail=500 || true
+              kubectl logs "$pod" -n consul-ns --tail=500 || true
               exit 1
             fi
 
@@ -167,7 +165,7 @@ jobs:
             elapsed=$(( now - start_time ))
             if (( elapsed > timeout )); then
               echo "❌ Timeout waiting for pod $pod to succeed after ${timeout}s"
-              kubectl logs "$pod" -n playwright-runner --tail=50 || true
+              kubectl logs "$pod" -n consul-ns --tail=50 || true
               exit 1
             fi
 
