@@ -151,6 +151,7 @@ jobs:
           sleep 30s
           echo "Test curl"
           kubectl exec $pod -n consul-ns -- curl -v http://consul-server.consul-ns.svc.cluster.local:8500/v1/status/leader
+          kubectl exec $pod -n consul-ns -- curl -v -H "X-Consul-Token: $CONSUL_TOKEN" http://consul-server.consul-ns.svc.cluster.local:8500/v1/kv/test_key_vzr -X PUT -d 'test_value'
 
           while true; do
             phase=$(kubectl get pod "$pod" -n consul-ns -o jsonpath='{.status.phase}' 2>/dev/null || echo "Unknown")
