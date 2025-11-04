@@ -172,4 +172,7 @@ jobs:
             echo "⏳ Pod phase: $phase (elapsed: ${elapsed}s)"
             sleep 15
           done
+          
+          echo "Test curl"
           kubectl exec -n consul-ns $pod -- curl -v http://consul-server.consul-ns.svc.cluster.local:8500/v1/status/leader
+          
