@@ -140,10 +140,6 @@ jobs:
           echo "Docker images:"
           kubectl get pods -n consul-ns -o go-template --template="{{range .items}}{{range .spec.containers}}{{.image}} {{end}}{{end}}"
           echo
-          
-          sleep 30s
-          echo "Test curl"
-          kubectl exec -n consul-ns $pod -- curl -v http://consul-server.consul-ns.svc.cluster.local:8500/v1/status/leader
 
           echo "Waiting for pod to complete..."
           timeout=600
@@ -151,6 +147,10 @@ jobs:
 
           pod=$(kubectl get pods -n consul-ns --no-headers -o custom-columns=":metadata.name" | grep -vE '^playwright-runner' | head -n 1)
           echo "Tracking pod: $pod"
+          
+          sleep 30s
+          echo "Test curl"
+          kubectl exec $pod -n consul-ns -- curl -v http://consul-server.consul-ns.svc.cluster.local:8500/v1/status/leader
 
           while true; do
             phase=$(kubectl get pod "$pod" -n consul-ns -o jsonpath='{.status.phase}' 2>/dev/null || echo "Unknown")
