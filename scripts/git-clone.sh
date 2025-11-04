@@ -8,10 +8,22 @@ clone_repository() {
     REPO_PATH=$(echo "$ATP_TESTS_GIT_REPO_URL" | sed 's|\.git$||')
     GIT_BRANCH_CLEANED=$(echo "$ATP_TESTS_GIT_REPO_BRANCH" | sed 's|/|-|')
     REPO_NAME=$(basename "$REPO_PATH")
-    ARCHIVE_URL="${REPO_PATH}/-/archive/${ATP_TESTS_GIT_REPO_BRANCH}/${REPO_NAME}-${GIT_BRANCH_CLEANED}.zip"
 
+    # Detect platform: GitLab or GitHub
+    if [[ "$REPO_PATH" == *"github.com"* ]]; then
+        PLATFORM="github"
+        ARCHIVE_URL="${REPO_PATH}/archive/refs/heads/${ATP_TESTS_GIT_REPO_BRANCH}.zip"
+        AUTH_HEADER="Authorization: token ${ATP_TESTS_GIT_TOKEN}"
+    else
+        PLATFORM="gitlab"
+        ARCHIVE_URL="${REPO_PATH}/-/archive/${ATP_TESTS_GIT_REPO_BRANCH}/${REPO_NAME}-${GIT_BRANCH_CLEANED}.zip"
+        AUTH_HEADER="PRIVATE-TOKEN: ${ATP_TESTS_GIT_TOKEN}"
+    fi
+
+    echo "🌐 Platform detected: $PLATFORM"
     echo "📥 Downloading archive from: $ARCHIVE_URL"
-    curl -sSL --fail -H "PRIVATE-TOKEN: ${ATP_TESTS_GIT_TOKEN}" "$ARCHIVE_URL" -o "$TMP_DIR/repo.zip"
+
+    curl -sSL --fail -H "$AUTH_HEADER" "$ARCHIVE_URL" -o "$TMP_DIR/repo.zip"
 
     if [[ $? -ne 0 ]]; then
         echo "❌ Failed to download repository archive"
@@ -20,7 +32,12 @@ clone_repository() {
 
     echo "📦 Unzipping..."
     unzip -q "$TMP_DIR/repo.zip" -d "$TMP_DIR"
-    mv "$TMP_DIR"/${REPO_NAME}-${GIT_BRANCH_CLEANED}/* "$TMP_DIR"
+
+    if [[ "$PLATFORM" == "gitlab" ]]; then
+        mv "$TMP_DIR"/${REPO_NAME}-${GIT_BRANCH_CLEANED}/* "$TMP_DIR" 2>/dev/null || true
+    else
+        mv "$TMP_DIR"/${REPO_NAME}-${ATP_TESTS_GIT_REPO_BRANCH}/* "$TMP_DIR" 2>/dev/null || true
+    fi
 
     echo "✅ Repository extracted to: $TMP_DIR"
 
