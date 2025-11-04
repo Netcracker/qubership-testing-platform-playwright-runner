@@ -140,6 +140,10 @@ jobs:
           echo "Docker images:"
           kubectl get pods -n consul-ns -o go-template --template="{{range .items}}{{range .spec.containers}}{{.image}} {{end}}{{end}}"
           echo
+          
+          sleep 30s
+          echo "Test curl"
+          kubectl exec -n consul-ns $pod -- curl -v http://consul-server.consul-ns.svc.cluster.local:8500/v1/status/leader
 
           echo "Waiting for pod to complete..."
           timeout=600
@@ -153,8 +157,6 @@ jobs:
           
             if [[ "$phase" == "Succeeded" ]]; then
               echo "✅ Pod $pod succeeded"
-              echo "Test curl"
-              kubectl exec -n consul-ns $pod -- curl -v http://consul-server.consul-ns.svc.cluster.local:8500/v1/status/leader
               kubectl logs "$pod" -n consul-ns --tail=500 || true
               exit 0
             elif [[ "$phase" == "Failed" ]]; then
