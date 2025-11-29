@@ -28,6 +28,7 @@
     "dependencies": {
         "winston": "3.10.0",
         "@types/node-fetch": "2.6.12",
+        "@types/xlsx": "0.0.36",
         "node-fetch": "3.3.2",
         "https": "1.0.0",
         "oracledb": "6.8.0",

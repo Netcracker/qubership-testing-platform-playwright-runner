@@ -18,3 +18,12 @@ ATP_RUNNER_JOB_EXIT_STRATEGY: "EXIT_ALWAYS"
 TEST_PARAMS: {}
 ATP_ENVGENE_CONFIGURATION: {}
 ENABLE_JIRA_INTEGRATION: false
+MONITORING_ENABLED: true
+PLAYWRIGHT_TRACE_MODE: "retain-on-failure"
+SECURITY_CONTEXT_ENABLED: false
+podSecurityContext:
+  runAsUser: 1000
+  fsGroup: 1000
+containerSecurityContext: {}
+affinity: {}
+tolerations: []
