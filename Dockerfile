@@ -33,6 +33,8 @@ RUN npm set strict-ssl=false && \
     npm ci
 
 COPY scripts/ /scripts/
+RUN ls -la
+RUN ls -la scripts
 COPY scripts/runtimes/playwright-setup.sh /scripts/runtime-setup.sh
 
 COPY entrypoint.sh /entrypoint.sh
