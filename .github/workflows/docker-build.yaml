@@ -77,6 +77,11 @@ jobs:
         with:
           default-template: '{{ref-name}}-{{timestamp}}'
 
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
       - name: Build and Publish Docker Image
         uses: netcracker/qubership-workflow-hub/actions/docker-action@main
         with:
