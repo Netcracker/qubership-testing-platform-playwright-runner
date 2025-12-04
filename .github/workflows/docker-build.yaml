@@ -26,7 +26,7 @@ jobs:
       platforms: ${{ steps.load_component.outputs.platforms }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
 
@@ -69,7 +69,7 @@ jobs:
     needs: [ load-docker-build-components ]
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Metadata
         id: metadata
@@ -78,7 +78,7 @@ jobs:
           default-template: '{{ref-name}}-{{timestamp}}'
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           submodules: recursive
 
