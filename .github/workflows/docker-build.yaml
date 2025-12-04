@@ -83,10 +83,10 @@ jobs:
           submodules: recursive
 
       - name: Build and Publish Docker Image
-        uses: netcracker/qubership-workflow-hub/actions/docker-action@main
+        uses: netcracker/qubership-workflow-hub/actions/docker-action@b6d2198c722564e250d985a99990230d85b0d686 #v2.0.3
         with:
           ref: ${{ github.ref }}
-          tags: ${{steps.metadata.outputs.result}},${{ github.ref_name }}_latest
+          tags: ${{steps.metadata.outputs.result}}, ${{ github.ref_name }}_latest
           component: ${{ toJson(matrix.component) }}
           platforms: ${{ needs.load-docker-build-components.outputs.platforms }}
           dry-run: false
