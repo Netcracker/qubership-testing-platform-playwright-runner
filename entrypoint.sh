@@ -28,7 +28,7 @@ setup_runtime_environment
 start_upload_monitoring
 run_tests
 generate_email_notification_json
-save_native_report $TMP_DIR/test-results
+save_native_report $TMP_DIR/playwright-report
 finalize_upload
 
 sleep 15
