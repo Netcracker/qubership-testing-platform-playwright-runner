@@ -54,8 +54,6 @@ jobs:
           fi
           echo "components=${components}" >> $GITHUB_OUTPUT
           echo "platforms=${platforms}" >> $GITHUB_OUTPUT
-          echo "components=${components}"
-          echo "platforms=${platforms}"
 
   docker-build:
     needs: [load-docker-build-components]
@@ -73,9 +71,7 @@ jobs:
         component: ${{ fromJson(needs.load-docker-build-components.outputs.component) }}
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
-        with:
-          persist-credentials: false
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: "Prepare tags"
         id: prepare_tags
@@ -110,6 +106,11 @@ jobs:
       - name: "Summary step"
         run: |
           echo "**Tags:** ${{ steps.prepare_tags.outputs.new_tag }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          submodules: recursive
 
       - name: Build and Publish Docker Image
         uses: netcracker/qubership-workflow-hub/actions/docker-action@396774180000abdb825cbf150b56cc59c6913db8 #v2.0.5
