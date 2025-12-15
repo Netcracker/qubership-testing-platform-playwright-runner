@@ -14,31 +14,10 @@ on:
         required: true
         default: 'patch'
 
-  push:
-    branches:
-      - '**'
-    paths-ignore:
-      - '.github/**'
-      - 'docs/**'
-      - 'CODE-OF-CONDUCT.md'
-      - 'CONTRIBUTING.md'
-      - 'LICENSE'
-      - 'README.md'
-      - 'SECURITY.md'
-  pull_request:
-    branches:
-      - '**'
-    paths-ignore:
-      - '.github/**'
-      - 'docs/**'
-      - 'CODE-OF-CONDUCT.md'
-      - 'CONTRIBUTING.md'
-      - 'LICENSE'
-      - 'README.md'
-      - 'SECURITY.md'
 permissions:
   contents: write
   packages: write
+
 jobs:
   load-docker-build-components:
     runs-on: ubuntu-latest
