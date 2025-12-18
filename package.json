@@ -1,0 +1,39 @@
+{
+    "name": "@qubership/atp3-playwright-runner",
+    "version": "0.0.21",
+    "description": "",
+    "main": "playwright.config.js",
+    "directories": {
+        "test": "tests"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "type": "commonjs",
+    "devDependencies": {
+        "@playwright/test": "1.51.1",
+        "@types/node": "22.14.1",
+        "allure-playwright": "3.2.1",
+        "@faker-js/faker": "9.7.0",
+        "newman": "6.2.1",
+        "csv-parse": "6.0.0",
+        "daff": "1.4.2",
+        "jsondiffpatch": "^0.7.3",
+        "js-yaml": "4.1.0",
+        "diff-match-patch": "^1.0.5",
+        "exceljs": "4.4.0",
+        "consul": "2.0.1",
+        "axios": "1.7.7"
+    },
+    "dependencies": {
+        "winston": "3.10.0",
+        "@types/node-fetch": "2.6.12",
+        "@types/xlsx": "0.0.36",
+        "node-fetch": "3.3.2",
+        "https": "1.0.0",
+        "oracledb": "6.8.0",
+        "ssh2": "1.16.0",
+        "undici": "7.13.0",
+        "xlsx": "0.18.5"
+    }
+}
