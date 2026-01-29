@@ -31,7 +31,7 @@ RUN groupadd -g 1007 runner && \
 
 WORKDIR $HOME_EX
 
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json .npmrc ./
 RUN npm set strict-ssl=false && \
     npm init -y && \
     npm ci
