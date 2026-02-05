@@ -24,18 +24,18 @@ spec:
       {{- end }}
       containers:
       - name: atp3-playwright-runner
-        image: '{{ .Values.DOCKER_TAG }}'
+        image: '{{ default .Values.DOCKER_TAG .Values.ATP_TESTS_DOCKER_TAG }}'
         {{- if .Values.SECURITY_CONTEXT_ENABLED }}
         securityContext:
           {{- include "securityContext.container" . | nindent 12 }}
         {{- end }}
         resources:
           requests:
-            memory: '{{ .Values.MEMORY_REQUEST }}'
-            cpu: '{{ .Values.CPU_REQUEST }}'
+            memory: '{{ .Values.MEMORY_REQUEST | default "1000Mi" }}'
+            cpu: '{{ .Values.CPU_REQUEST | default "100m" }}'
           limits:
-            memory: '{{ .Values.MEMORY_LIMIT }}'
-            cpu: '{{ .Values.CPU_LIMIT }}'
+            memory: '{{ .Values.MEMORY_LIMIT | default "2000Mi" }}'
+            cpu: '{{ .Values.CPU_LIMIT | default "500m" }}'
         env:
           - name: ATP_TESTS_GIT_REPO_URL
             value: "{{ .Values.ATP_TESTS_GIT_REPO_URL }}"

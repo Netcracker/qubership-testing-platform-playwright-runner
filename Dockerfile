@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/playwright:v1.51.1-noble
 
-WORKDIR /
+ENV HOME_EX=/app
 
 RUN rm -f /etc/apt/sources.list.d/* && \
     echo "deb [arch=amd64] http://archive.ubuntu.com/ubuntu noble main multiverse restricted universe" > /etc/apt/sources.list && \
@@ -8,7 +8,7 @@ RUN rm -f /etc/apt/sources.list.d/* && \
     echo "deb [arch=amd64] http://archive.ubuntu.com/ubuntu noble-backports main restricted universe multiverse" >> /etc/apt/sources.list && \
     echo "deb [arch=amd64] http://security.ubuntu.com/ubuntu noble-security main multiverse restricted universe" >> /etc/apt/sources.list
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     unzip \
     nano \
@@ -24,20 +24,27 @@ RUN curl -L -o /tmp/s5cmd.tar.gz \
     chmod +x /usr/local/bin/s5cmd && \
     rm -rf /tmp/s5cmd*
 
-WORKDIR /app
-USER root
+RUN groupadd -g 1007 runner && \
+    useradd -u 1007 -g runner -m -d "$HOME_EX" runner && \
+    mkdir -p "$HOME_EX" && \
+    chown -R runner:runner "$HOME_EX"
 
-COPY package.json package-lock.json ./
+WORKDIR $HOME_EX
+
+COPY package.json package-lock.json .npmrc ./
 RUN npm set strict-ssl=false && \
     npm init -y && \
     npm ci
 
-COPY scripts/ /scripts/
-COPY scripts/runtimes/playwright-setup.sh /scripts/runtime-setup.sh
+RUN chown -R runner:runner $HOME_EX
 
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY --chown=runner:runner scripts/ /scripts/
+COPY --chown=runner:runner scripts/runtimes/playwright-setup.sh /scripts/runtime-setup.sh
+COPY --chown=runner:runner --chmod=755 entrypoint.sh /app/entrypoint.sh
 
-WORKDIR /
+RUN chmod -R 755 /scripts
 
-ENTRYPOINT ["/entrypoint.sh"]
+USER 1007
+
+ENTRYPOINT ["/app/entrypoint.sh"]
+

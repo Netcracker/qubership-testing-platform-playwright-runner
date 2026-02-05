@@ -26,7 +26,7 @@ jobs:
       platforms: ${{ steps.load_component.outputs.platforms }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
 
@@ -69,19 +69,35 @@ jobs:
     needs: [ load-docker-build-components ]
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Replace slash in service branch
+        id: replace_slash
+        run: |
+          service_branch="$GITHUB_REF_NAME"
+
+          if [[ "$service_branch" == *"/"* ]]; then
+            service_branch="${service_branch//\//_}"
+          fi
+          echo "Branch is: $service_branch"
+          echo "SERVICE_BRANCH=$service_branch" >> $GITHUB_ENV
 
       - name: Metadata
         id: metadata
-        uses: netcracker/qubership-workflow-hub/actions/metadata-action@9319676b7d20b423a2e0943a0ac08da07d615998 #v1.0.6
+        uses: netcracker/qubership-workflow-hub/actions/metadata-action@396774180000abdb825cbf150b56cc59c6913db8 #v2.0.5
         with:
           default-template: '{{ref-name}}-{{timestamp}}'
 
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          submodules: recursive
+
       - name: Build and Publish Docker Image
-        uses: netcracker/qubership-workflow-hub/actions/docker-action@main
+        uses: netcracker/qubership-workflow-hub/actions/docker-action@396774180000abdb825cbf150b56cc59c6913db8 #v2.0.5
         with:
           ref: ${{ github.ref }}
-          tags: ${{steps.metadata.outputs.result}},${{ github.ref_name }}_latest
+          tags: ${{steps.metadata.outputs.result}}, ${{ env.SERVICE_BRANCH }}_latest
           component: ${{ toJson(matrix.component) }}
           platforms: ${{ needs.load-docker-build-components.outputs.platforms }}
           dry-run: false
