@@ -69,8 +69,8 @@ spec:
             value: "{{ .Values.PLAYWRIGHT_TRACE_MODE }}"
           - name: ATP_ENVGENE_CONFIGURATION
             valueFrom:
-              configMapKeyRef:
-                name: {{ include "atp3-playwright-runner.fullname" . }}-cm
+              secretKeyRef:
+                name: {{ include "atp3-playwright-runner.fullname" . }}-secret
                 key: atpEnvgeneConfiguration
           - name: TEST_PARAMS
             valueFrom:
