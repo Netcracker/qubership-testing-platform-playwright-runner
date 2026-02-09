@@ -131,3 +131,4 @@ jobs:
     with:
       version: ${{ needs.docker-build.outputs.tags }}
       publish: true
+
