@@ -23,6 +23,7 @@ source /scripts/native-report.sh
 echo "🚀 Starting test execution workflow..."
 
 init_environment
+load_envgene
 clone_repository
 setup_runtime_environment
 start_upload_monitoring

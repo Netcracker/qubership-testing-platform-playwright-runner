@@ -1,7 +1,6 @@
 FROM mcr.microsoft.com/playwright:v1.51.1-noble
 
 ENV HOME_EX=/app
-
 RUN rm -f /etc/apt/sources.list.d/* && \
     echo "deb [arch=amd64] http://archive.ubuntu.com/ubuntu noble main multiverse restricted universe" > /etc/apt/sources.list && \
     echo "deb [arch=amd64] http://archive.ubuntu.com/ubuntu noble-updates main multiverse restricted universe" >> /etc/apt/sources.list && \
@@ -16,6 +15,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     jq \
     inotify-tools \
     && rm -rf /var/lib/apt/lists/*
+
+RUN npm install -g @usebruno/cli
 
 RUN curl -L -o /tmp/s5cmd.tar.gz \
     https://github.com/peak/s5cmd/releases/download/v2.3.0/s5cmd_2.3.0_Linux-64bit.tar.gz && \
