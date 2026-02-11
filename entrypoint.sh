@@ -10,6 +10,29 @@ echo "📅 Timestamp: $(date)"
 export UPLOAD_METHOD="${UPLOAD_METHOD:-sync}"
 echo "📤 Upload method: $UPLOAD_METHOD"
 
+# Generate trace ID and export B3 headers (job-level correlation)
+if [ -f "$WORK_DIR/scripts/trace-id-generator.sh" ]; then
+  # shellcheck disable=SC1091
+  source $WORK_DIR/scripts/trace-id-generator.sh
+  echo "🔍 B3 Trace ID (X-B3-TraceId): ${X_B3_TRACE_ID:-<not set>}"
+  echo "🔍 B3 Span ID  (X-B3-SpanId):  ${X_B3_SPAN_ID:-<not set>}"
+  echo "🔍 B3 Sampled  (X-B3-Sampled): ${X_B3_SAMPLED:-<not set>}"
+else
+  echo "⚠️ $WORK_DIR/scripts/trace-id-generator.sh not found; skipping B3 trace generation"
+fi
+
+# Initialize OpenTelemetry in Node processes (if enabled)
+if [ "${OTEL_ENABLED:-true}" = "true" ]; then
+  if [ -f "$WORK_DIR/scripts/otel-init.js" ]; then
+    export NODE_OPTIONS="${NODE_OPTIONS:-} --require $WORK_DIR/scripts/otel-init.js"
+    echo "✅ OpenTelemetry enabled (NODE_OPTIONS updated)"
+  else
+    echo "⚠️ $WORK_DIR/scripts/otel-init.js not found; OpenTelemetry not initialized"
+  fi
+else
+  echo "ℹ️ OpenTelemetry disabled (OTEL_ENABLED=$OTEL_ENABLED)"
+fi
+
 # Import modular components
 source /scripts/init.sh
 source /scripts/git-clone.sh
