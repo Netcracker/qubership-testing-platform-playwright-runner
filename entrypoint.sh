@@ -25,6 +25,7 @@ fi
 if [ "${OTEL_ENABLED:-true}" = "true" ]; then
   if [ -f "$WORK_DIR/scripts/otel-init.js" ]; then
     export NODE_OPTIONS="${NODE_OPTIONS:-} --require $WORK_DIR/scripts/otel-init.js"
+    export NODE_PATH="/app/node_modules${NODE_PATH:+:$NODE_PATH}"
     echo "✅ OpenTelemetry enabled (NODE_OPTIONS updated)"
   else
     echo "⚠️ $WORK_DIR/scripts/otel-init.js not found; OpenTelemetry not initialized"
