@@ -2,6 +2,7 @@
 - [Deploy parameters](#deploy-parameters)
 - [Hardware / Resource Requirements (HWE)](#hardware--resource-requirements-hwe)
 - [Playwright Native Report (Trace Configuration)](#playwright-native-report-trace-configuration)
+  - [Possible Values](#possible-values)
 
 ## Deploy parameters
 
@@ -81,3 +82,28 @@ To debug a test using Playwright trace:
 3. Open the trace locally: `npx playwright show-trace trace.zip` or `playwright show-trace trace.zip`.
 
 4. Inspect the test execution. The trace viewer will open in your browser, allowing you to: replay test steps, view console logs & network requests, inspect DOM snapshots at each action.
+
+## Distributed Tracing Configuration
+
+The runner can generate B3 correlation identifiers and (optionally) bootstrap OpenTelemetry export from Node.js processes.
+
+### B3 Trace ID Format
+
+The runner generates a custom 16-character trace ID:
+- **Format**: `PROJECT_TRACE_ID(4) + run_id(4) + step_id(5) + random(3)` = 16 characters
+- **Example**: `PRJC1A2B00001ABC`
+
+### Configuration Parameters
+
+| Parameter | Type | Mandatory | Default | Description |
+|-----------|------|-----------|---------|-------------|
+| PROJECT_TRACE_ID | string | no | `"UNKW"` | 4-character project identifier for correlation |
+| OTEL_COLLECTOR_ENDPOINT | string | no | `"http://otel-collector:4318/v1/traces"` | OpenTelemetry collector traces endpoint (OTLP/HTTP) |
+| OTEL_ENABLED | boolean | no | `true` | Enable/disable OpenTelemetry bootstrap for Node.js processes |
+
+### B3 Headers (Environment Variables)
+
+The following variables are generated at job start and available to the runner and tests:
+- `X_B3_TRACE_ID` (maps to header `X-B3-TraceId`)
+- `X_B3_SPAN_ID` (maps to header `X-B3-SpanId`)
+- `X_B3_SAMPLED` (maps to header `X-B3-Sampled`, always `"1"`)
