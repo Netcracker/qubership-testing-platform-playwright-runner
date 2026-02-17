@@ -16,8 +16,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     inotify-tools \
     && rm -rf /var/lib/apt/lists/*
 
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    openssh-client \
+    sshpass \
+    postgresql-client \
+    mysql-client \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN npm install -g @usebruno/cli
 
+RUN apt-get update && apt-get install -y \
+    cassandra-tools \
+    && rm -rf /var/lib/apt/lists/*
 RUN curl -L -o /tmp/s5cmd.tar.gz \
     https://github.com/peak/s5cmd/releases/download/v2.3.0/s5cmd_2.3.0_Linux-64bit.tar.gz && \
     tar -xzf /tmp/s5cmd.tar.gz -C /tmp && \
