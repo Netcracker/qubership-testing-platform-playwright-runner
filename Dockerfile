@@ -1,34 +1,28 @@
 FROM mcr.microsoft.com/playwright:v1.51.1-noble
 
 ENV HOME_EX=/app
+
 RUN rm -f /etc/apt/sources.list.d/* && \
     echo "deb [arch=amd64] http://archive.ubuntu.com/ubuntu noble main multiverse restricted universe" > /etc/apt/sources.list && \
     echo "deb [arch=amd64] http://archive.ubuntu.com/ubuntu noble-updates main multiverse restricted universe" >> /etc/apt/sources.list && \
     echo "deb [arch=amd64] http://archive.ubuntu.com/ubuntu noble-backports main restricted universe multiverse" >> /etc/apt/sources.list && \
-    echo "deb [arch=amd64] http://security.ubuntu.com/ubuntu noble-security main multiverse restricted universe" >> /etc/apt/sources.list
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    unzip \
-    nano \
-    bash \
-    jq \
-    inotify-tools \
-    && rm -rf /var/lib/apt/lists/*
-
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    openssh-client \
-    sshpass \
-    postgresql-client \
-    mysql-client \
+    echo "deb [arch=amd64] http://security.ubuntu.com/ubuntu noble-security main multiverse restricted universe" >> /etc/apt/sources.list && \
+    apt-get update && apt-get install -y --no-install-recommends \
+        curl \
+        unzip \
+        nano \
+        bash \
+        jq \
+        inotify-tools \
+        openssh-client \
+        sshpass \
+        postgresql-client \
+        mysql-client \
+        cassandra-tools \
     && rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g @usebruno/cli
 
-RUN apt-get update && apt-get install -y \
-    cassandra-tools \
-    && rm -rf /var/lib/apt/lists/*
 RUN curl -L -o /tmp/s5cmd.tar.gz \
     https://github.com/peak/s5cmd/releases/download/v2.3.0/s5cmd_2.3.0_Linux-64bit.tar.gz && \
     tar -xzf /tmp/s5cmd.tar.gz -C /tmp && \
@@ -59,4 +53,3 @@ RUN chmod -R 755 /scripts
 USER 1007
 
 ENTRYPOINT ["/app/entrypoint.sh"]
-
