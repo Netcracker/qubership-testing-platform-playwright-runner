@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright:v1.51.1-noble
+FROM mcr.microsoft.com/playwright:v1.58.2-noble
 
 ENV HOME_EX=/app
 
@@ -8,7 +8,7 @@ RUN rm -f /etc/apt/sources.list.d/* && \
     echo "deb [arch=amd64] http://archive.ubuntu.com/ubuntu noble-backports main restricted universe multiverse" >> /etc/apt/sources.list && \
     echo "deb [arch=amd64] http://security.ubuntu.com/ubuntu noble-security main multiverse restricted universe" >> /etc/apt/sources.list
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
     curl \
     unzip \
     nano \
