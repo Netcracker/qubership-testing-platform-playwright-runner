@@ -18,7 +18,6 @@ RUN rm -f /etc/apt/sources.list.d/* && \
         sshpass \
         postgresql-client \
         mysql-client \
-        cassandra-tools \
     && rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g @usebruno/cli
