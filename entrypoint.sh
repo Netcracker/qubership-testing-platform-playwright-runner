@@ -18,7 +18,7 @@ source /scripts/test-runner.sh
 source /scripts/upload-monitor.sh
 source /scripts/email-notification/generate-email-notification-json.sh
 source /scripts/native-report.sh
-source /scripts/envgene.sh
+source ./scripts/init.sh
 
 # Execute main workflow
 echo "🚀 Starting test execution workflow..."
