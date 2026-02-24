@@ -20,7 +20,8 @@ RUN rm -f /etc/apt/sources.list.d/* && \
         mysql-client \
     && rm -rf /var/lib/apt/lists/*
 
-RUN npm install -g @usebruno/cli
+ARG BRUNO_CLI_VERSION=2
+RUN npm install -g @usebruno/cli@${BRUNO_CLI_VERSION} && bru --version
 
 RUN curl -L -o /tmp/s5cmd.tar.gz \
     https://github.com/peak/s5cmd/releases/download/v2.3.0/s5cmd_2.3.0_Linux-64bit.tar.gz && \
