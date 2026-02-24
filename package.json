@@ -11,7 +11,6 @@
     "license": "ISC",
     "type": "commonjs",
     "devDependencies": {
-        "@usebruno/cli": "2.10.0",
         "@playwright/test": "1.51.1",
         "@types/node": "22.14.1",
         "allure-playwright": "3.2.1",
@@ -27,6 +26,7 @@
         "axios": "1.7.7"
     },
     "dependencies": {
+        "@usebruno/cli": "2.10.0",
         "winston": "3.10.0",
         "@types/node-fetch": "2.6.12",
         "@types/xlsx": "0.0.36",
