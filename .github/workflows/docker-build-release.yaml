@@ -71,8 +71,8 @@ jobs:
           echo "**Tags:** ${{ steps.prepare_tags.outputs.new_tag }}" >> $GITHUB_STEP_SUMMARY
 
   helm-chart-release:
-    needs: [ build-and-push ]
-    if: ${{ needs.build-and-push.result == 'success' }}
+    needs: [ docker-build ]
+    if: ${{ needs.docker-build.result == 'success' }}
     uses: netcracker/.github/workflow-templates/helm-charts-release.yaml@main
     with:
       release: ${{ needs.docker-build.outputs.tags }}
