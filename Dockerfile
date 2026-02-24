@@ -32,6 +32,7 @@ RUN groupadd -g 1007 runner && \
 WORKDIR $HOME_EX
 
 COPY package.json package-lock.json .npmrc ./
+RUN npm install -g npm@11.10.1 --no-fund --no-audit
 RUN npm set strict-ssl=false && \
     npm init -y && \
     npm ci
