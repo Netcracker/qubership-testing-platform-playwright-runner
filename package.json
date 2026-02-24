@@ -11,6 +11,7 @@
     "license": "ISC",
     "type": "commonjs",
     "devDependencies": {
+        "@usebruno/cli": "2.10.0",
         "@playwright/test": "1.51.1",
         "@types/node": "22.14.1",
         "allure-playwright": "3.2.1",
