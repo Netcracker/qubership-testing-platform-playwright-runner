@@ -1,0 +1,8 @@
+---
+
+charts:
+  - name: qubership-testing-platform-playwright-runner
+    chart_file: deployments/charts/helm/atp3-playwright-runner/Chart.yaml
+    values_file: deployments/charts/helm/atp3-playwright-runner/values.yaml
+    image:
+      - ghcr.io/netcracker/qubership-testing-platform-playwright-runner:${release}
