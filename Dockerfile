@@ -49,6 +49,7 @@ ENV NODE_PATH="/app/node_modules"
 COPY --chown=runner:runner scripts/ /scripts/
 COPY --chown=runner:runner scripts/runtimes/playwright-setup.sh /scripts/runtime-setup.sh
 COPY --chown=runner:runner --chmod=755 entrypoint.sh /app/entrypoint.sh
+COPY --chown=runner:runner tools/ /tools/
 
 RUN chmod -R 755 /scripts && \
     chown -R runner:runner $HOME_EX
