@@ -4,3 +4,7 @@ description: A Helm chart for deploying the atp3 playwright executor.
 type: application
 version: 0.1.0
 appVersion: "1.0"
+dependencies:
+  - name: deployment-lib
+    version: "0.0.1"
+    repository: "file://deployment-lib"

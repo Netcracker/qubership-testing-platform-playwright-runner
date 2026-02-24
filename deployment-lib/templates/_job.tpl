@@ -1,0 +1,98 @@
+{{- define "deployment-lib.job" -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "deployment-lib.fullname" . }}
+  labels:
+    app: {{ include "deployment-lib.name" . }}
+    metrics-type: atp3-service
+spec:
+  ttlSecondsAfterFinished: {{ .Values.ATP_RUNNER_JOB_TTL }}
+  template:
+    metadata:
+      labels:
+        metrics-type: atp3-service
+    spec:
+      {{- if .Values.SECURITY_CONTEXT_ENABLED }}
+      securityContext:
+        {{- include "deployment-lib.securityContext.pod" . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.affinity }}
+      affinity: {{- toYaml .Values.affinity | nindent 8 }}
+      {{- end }}
+      {{- if .Values.tolerations }}
+      tolerations: {{- toYaml .Values.tolerations | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: atp3-playwright-runner
+        image: '{{ default .Values.DOCKER_TAG .Values.ATP_TESTS_DOCKER_TAG }}'
+        {{- if .Values.SECURITY_CONTEXT_ENABLED }}
+        securityContext:
+          {{- include "deployment-lib.securityContext.container" . | nindent 12 }}
+        {{- end }}
+        resources:
+          requests:
+            memory: '{{ .Values.MEMORY_REQUEST | default "1000Mi" }}'
+            cpu: '{{ .Values.CPU_REQUEST | default "100m" }}'
+          limits:
+            memory: '{{ .Values.MEMORY_LIMIT | default "2000Mi" }}'
+            cpu: '{{ .Values.CPU_LIMIT | default "500m" }}'
+        env:
+          - name: ATP_TESTS_GIT_REPO_URL
+            value: "{{ .Values.ATP_TESTS_GIT_REPO_URL }}"
+          - name: ATP_TESTS_GIT_REPO_BRANCH
+            value: "{{ .Values.ATP_TESTS_GIT_REPO_BRANCH }}"
+          - name: ENVIRONMENT_NAME
+            value: "{{ .Values.ENVIRONMENT_NAME }}"
+          - name: ATP_STORAGE_PROVIDER
+            value: "{{ .Values.ATP_STORAGE_PROVIDER }}"
+          - name: ATP_STORAGE_REGION
+            value: "{{ .Values.ATP_STORAGE_REGION }}"
+          - name: ATP_STORAGE_SERVER_URL
+            value: "{{ .Values.ATP_STORAGE_SERVER_URL }}"
+          - name: ATP_STORAGE_SERVER_UI_URL
+            value: "{{ .Values.ATP_STORAGE_SERVER_UI_URL }}"
+          - name: ATP_REPORT_VIEW_UI_URL
+            value: "{{ .Values.ATP_REPORT_VIEW_UI_URL }}"
+          - name: ATP_RUNNER_JOB_EXIT_STRATEGY
+            value: "{{ .Values.ATP_RUNNER_JOB_EXIT_STRATEGY }}"
+          - name: CURRENT_DATE
+            value: "{{ .Values.CURRENT_DATE }}"
+          - name: CURRENT_TIME
+            value: "{{ .Values.CURRENT_TIME }}"
+          - name: ATP_STORAGE_BUCKET
+            value: "{{ .Values.ATP_STORAGE_BUCKET }}"
+          - name: ENABLE_JIRA_INTEGRATION
+            value: "{{ .Values.ENABLE_JIRA_INTEGRATION }}"
+          - name: MONITORING_ENABLED
+            value: "{{ .Values.MONITORING_ENABLED }}"
+          - name: PLAYWRIGHT_TRACE_MODE
+            value: "{{ .Values.PLAYWRIGHT_TRACE_MODE }}"
+          - name: ATP_ENVGENE_CONFIGURATION
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "deployment-lib.fullname" . }}-secret
+                key: atpEnvgeneConfiguration
+          - name: TEST_PARAMS
+            valueFrom:
+              configMapKeyRef:
+                name: {{ include "deployment-lib.fullname" . }}-cm
+                key: testParams
+          - name: ATP_TESTS_GIT_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "deployment-lib.fullname" . }}-secret
+                key: atpTestsGitToken
+          - name: ATP_STORAGE_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "deployment-lib.fullname" . }}-secret
+                key: atpStorageUsername
+          - name: ATP_STORAGE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "deployment-lib.fullname" . }}-secret
+                key: atpStoragePassword
+      restartPolicy: Never
+  backoffLimit: 0
+{{- end -}}
