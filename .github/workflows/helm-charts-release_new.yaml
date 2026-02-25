@@ -201,7 +201,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: release-${{ env.release }}
-          persist-credentials: false
+          persist-credentials: true
 
       - name: "Configure Git"
         run: |
