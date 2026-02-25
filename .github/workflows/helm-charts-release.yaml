@@ -1,18 +1,11 @@
-name: Helm Charts Release
+name: "Helm Charts Release"
 on:
-  push:
-    branches-ignore:
-      - "**release*"
-      - "prettier/**"
-      - "dependabot/**"
-    paths-ignore:
-      - "docs/**"
-      - "README.md"
-  workflow_dispatch: {}
-  pull_request:
-    branches: [main]
-    types:
-      [opened, reopened, synchronize]
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Release version'
+        required: true
+        type: string
 
 permissions:
   contents: read
