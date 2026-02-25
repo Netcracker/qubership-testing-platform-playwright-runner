@@ -138,7 +138,7 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 0
-          persist-credentials: false
+          persist-credentials: true
       - name: "Update versions in values"
         id: update-versions
         uses: netcracker/qubership-workflow-hub/actions/charts-values-update-action@8d542a426ce561c7dce745f6b9cee068d1d7e101 #v2.0.10
