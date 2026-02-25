@@ -109,6 +109,10 @@ jobs:
         id: get-version
         run: |
           echo "IMAGE=${{ matrix.component.name }}" >> $GITHUB_ENV
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          submodules: recursive
       - name: "Docker dry run build"
         uses: netcracker/qubership-workflow-hub/actions/docker-action@8d542a426ce561c7dce745f6b9cee068d1d7e101 #v2.0.10
         with:
