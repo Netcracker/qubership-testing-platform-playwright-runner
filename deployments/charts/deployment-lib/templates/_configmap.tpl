@@ -1,4 +1,4 @@
-{{- define "common-lib.configmap" -}}
+{{- define "deployment-lib.configmap" -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
