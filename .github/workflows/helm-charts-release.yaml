@@ -145,9 +145,19 @@ jobs:
       - name: "Debug"
         env:
           IMAGES_VERSIONS: "${{ steps.update-versions.outputs.images-versions }}"
+        if: always()
+        shell: bash
         run: |
           echo "Images versions: ${IMAGES_VERSIONS}"
           ls -laR
+          for chart in /home/runner/work/qubership-testing-platform-playwright-runner/qubership-testing-platform-playwright-runner/.cr-release-packages/*.tgz; do
+            helm show chart ${chart}
+            chart_name=$(helm show chart ${chart} | grep "name: " | sed "s#^\s*name:\s*##" | tr -d '\r')
+            chart_version=$(helm show chart ${chart} | grep "version: " | sed "s#^\s*version:\s*##" | tr -d '\r')
+            echo "chart_name: '$chart_name'"
+            echo "chart_version: '$chart_version'"
+          done
+          
 
   docker-build:
     name: ${{ matrix.component.name }}
