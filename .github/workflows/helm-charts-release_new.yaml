@@ -212,7 +212,7 @@ jobs:
         #continue-on-error: true
         uses: netcracker/chart-releaser-action@8b8ae0a2b1c00c93200f85e3bce356b50900b590 # main
         with:
-          charts_dir: charts/helm
+          charts_dir: deployments/charts/atp3-playwright-runner
           release_name_template: "{{ .Version }}"
           skip_existing: true
           skip_upload: true
