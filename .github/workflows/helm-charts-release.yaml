@@ -1,11 +1,18 @@
 name: "Helm Charts Release NC"
 on:
-  workflow_dispatch:
-    inputs:
-      release:
-        description: 'Release version'
-        required: true
-        type: string
+  push:
+    branches-ignore:
+      - "**release*"
+      - "prettier/**"
+      - "dependabot/**"
+    paths-ignore:
+      - "docs/**"
+      - "README.md"
+  workflow_dispatch: {}
+  pull_request:
+    branches: [main]
+    types:
+      [opened, reopened, synchronize]
 
 permissions:
   contents: read
@@ -14,6 +21,10 @@ run-name: ${{ github.repository }} Release ${{ inputs.release }}
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+env:
+  release: "3.0.0"
+
 jobs:
   check-tag:
     runs-on: ubuntu-latest

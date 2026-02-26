@@ -27,6 +27,7 @@ on:
     paths-ignore:
       - "docs/**"
       - "README.md"
+      - ".github/**"
   workflow_dispatch: {}
   pull_request:
     branches: [main]
