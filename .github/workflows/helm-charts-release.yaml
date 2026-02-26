@@ -17,7 +17,7 @@ on:
 permissions:
   contents: read
 
-run-name: ${{ github.repository }} Release ${{ inputs.release }}
+run-name: ${{ github.repository }} Release ${{ env.release }}
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -33,7 +33,7 @@ jobs:
         id: check_tag
         uses: netcracker/qubership-workflow-hub/actions/tag-action@8d542a426ce561c7dce745f6b9cee068d1d7e101 # v2.0.10
         with:
-          tag-name: '${{ inputs.release }}'
+          tag-name: '${{ env.release }}'
           ref: ${{ github.ref }}
           create-tag: false
           check-tag: true
@@ -137,9 +137,9 @@ jobs:
         id: update-versions
         uses: netcracker/qubership-workflow-hub/actions/charts-values-update-action@main
         with:
-          release-version: ${{ inputs.release }}
+          release-version: ${{ env.release }}
           config-file: .github/helm-charts-release-config.yaml
-          default-tag: ${{ inputs.release }}
+          default-tag: ${{ env.release }}
           package-charts: true
           publish-charts: true
 
@@ -174,7 +174,7 @@ jobs:
       - name: Get version for current component
         id: get-version
         env:
-          IMAGE_VER: "${{ fromJson(needs.chart-release.outputs.images-versions)[matrix.component.name] || inputs.release }}"
+          IMAGE_VER: "${{ fromJson(needs.chart-release.outputs.images-versions)[matrix.component.name] || env.release }}"
         run: |
           echo "IMAGE_VERSION=${IMAGE_VER}" >> $GITHUB_ENV
 
@@ -182,12 +182,12 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           submodules: recursive
-          ref: release-${{ inputs.release }}
+          ref: release-${{ env.release }}
 
       - name: Docker build
         uses: netcracker/qubership-workflow-hub/actions/docker-action@8d542a426ce561c7dce745f6b9cee068d1d7e101 # v2.0.10
         with:
-          ref: release-${{ inputs.release }}
+          ref: release-${{ env.release }}
           download-artifact: false
           dry-run: false
           component: ${{ toJson(matrix.component) }}
@@ -208,7 +208,7 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
         with:
           fetch-depth: 0
-          ref: release-${{ inputs.release }}
+          ref: release-${{ env.release }}
           persist-credentials: true
 
       - name: "Release-drafter"
@@ -216,10 +216,10 @@ jobs:
         with:
           config-name: release-drafter-config.yml
           publish: true
-          name: ${{ inputs.release }}
-          tag: ${{ inputs.release }}
-          version: ${{ inputs.release }}
-          commitish: release-${{ inputs.release }}
+          name: ${{ env.release }}
+          tag: ${{ env.release }}
+          version: ${{ env.release }}
+          commitish: release-${{ env.release }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -230,7 +230,7 @@ jobs:
       - name: "Upload Assets"
         uses: netcracker/qubership-workflow-hub/actions/assets-action@8d542a426ce561c7dce745f6b9cee068d1d7e101 # v2.0.10
         with:
-          tag: ${{ inputs.release }}
+          tag: ${{ env.release }}
           item-path: "./*.tgz"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
