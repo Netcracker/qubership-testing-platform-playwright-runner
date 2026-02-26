@@ -6,3 +6,7 @@ charts:
     values_file: deployments/charts/atp3-playwright-runner/values.yaml
     image:
       - ghcr.io/netcracker/qubership-testing-platform-playwright-runner:${release}
+  - name: deployment-lib
+    chart_file: deployments/charts/deployment-lib/Chart.yaml
+    values_file: deployments/charts/deployment-lib/values.yaml
+    image: []
