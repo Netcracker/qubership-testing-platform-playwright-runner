@@ -17,14 +17,13 @@ on:
 permissions:
   contents: read
 
+env:
+  release: "3.0.0"
+
 run-name: ${{ github.repository }} Release ${{ env.release }}
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
-env:
-  release: "3.0.0"
-
 jobs:
   check-tag:
     runs-on: ubuntu-latest
