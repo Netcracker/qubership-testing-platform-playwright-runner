@@ -2,7 +2,7 @@ apiVersion: v2
 name: atp3-playwright-runner
 description: A Helm chart for deploying the atp3 playwright executor.
 type: application
-version: 0.1.0
+version: 3.0.2
 appVersion: "1.0"
 dependencies:
   - name: deployment-lib
