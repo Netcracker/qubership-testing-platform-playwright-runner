@@ -16,7 +16,7 @@ Return the chart name.
 runAsNonRoot: true
 seccompProfile:
   type: "RuntimeDefault"
-{{- with .Values.podSecurityContext }}
+{{- with .Values.deploymentlib.podSecurityContext }}
 {{ toYaml . }}
 {{- end -}}
 {{- end -}}
@@ -25,7 +25,7 @@ seccompProfile:
 allowPrivilegeEscalation: false
 capabilities:
   drop: ["ALL"]
-{{- with .Values.containerSecurityContext }}
+{{- with .Values.deploymentlib.containerSecurityContext }}
 {{ toYaml . }}
 {{- end -}}
 {{- end -}}

@@ -7,67 +7,67 @@ metadata:
     app: {{ include "deployment-lib.name" . }}
     metrics-type: atp3-service
 spec:
-  ttlSecondsAfterFinished: {{ .Values.ATP_RUNNER_JOB_TTL }}
+  ttlSecondsAfterFinished: {{ .Values.deploymentlib.ATP_RUNNER_JOB_TTL }}
   template:
     metadata:
       labels:
         metrics-type: atp3-service
     spec:
-      {{- if .Values.SECURITY_CONTEXT_ENABLED }}
+      {{- if .Values.deploymentlib.SECURITY_CONTEXT_ENABLED }}
       securityContext:
         {{- include "deployment-lib.securityContext.pod" . | nindent 8 }}
       {{- end }}
       {{- if .Values.affinity }}
-      affinity: {{- toYaml .Values.affinity | nindent 8 }}
+      affinity: {{- toYaml .Values.deploymentlib.affinity | nindent 8 }}
       {{- end }}
       {{- if .Values.tolerations }}
-      tolerations: {{- toYaml .Values.tolerations | nindent 8 }}
+      tolerations: {{- toYaml .Values.deploymentlib.tolerations | nindent 8 }}
       {{- end }}
       containers:
       - name: atp3-playwright-runner
-        image: '{{ default .Values.DOCKER_TAG .Values.ATP_TESTS_DOCKER_TAG }}'
+        image: '{{ default .Values.deploymentlib.DOCKER_TAG .Values.deploymentlib.ATP_TESTS_DOCKER_TAG }}'
         {{- if .Values.SECURITY_CONTEXT_ENABLED }}
         securityContext:
           {{- include "deployment-lib.securityContext.container" . | nindent 12 }}
         {{- end }}
         resources:
           requests:
-            memory: '{{ .Values.MEMORY_REQUEST | default "1000Mi" }}'
-            cpu: '{{ .Values.CPU_REQUEST | default "100m" }}'
+            memory: '{{ .Values.deploymentlib.MEMORY_REQUEST | default "1000Mi" }}'
+            cpu: '{{ .Values.deploymentlib.CPU_REQUEST | default "100m" }}'
           limits:
-            memory: '{{ .Values.MEMORY_LIMIT | default "2000Mi" }}'
-            cpu: '{{ .Values.CPU_LIMIT | default "500m" }}'
+            memory: '{{ .Values.deploymentlib.MEMORY_LIMIT | default "2000Mi" }}'
+            cpu: '{{ .Values.deploymentlib.CPU_LIMIT | default "500m" }}'
         env:
           - name: ATP_TESTS_GIT_REPO_URL
-            value: "{{ .Values.ATP_TESTS_GIT_REPO_URL }}"
+            value: "{{ .Values.deploymentlib.ATP_TESTS_GIT_REPO_URL }}"
           - name: ATP_TESTS_GIT_REPO_BRANCH
-            value: "{{ .Values.ATP_TESTS_GIT_REPO_BRANCH }}"
+            value: "{{ .Values.deploymentlib.ATP_TESTS_GIT_REPO_BRANCH }}"
           - name: ENVIRONMENT_NAME
-            value: "{{ .Values.ENVIRONMENT_NAME }}"
+            value: "{{ .Values.deploymentlib.ENVIRONMENT_NAME }}"
           - name: ATP_STORAGE_PROVIDER
-            value: "{{ .Values.ATP_STORAGE_PROVIDER }}"
+            value: "{{ .Values.deploymentlib.ATP_STORAGE_PROVIDER }}"
           - name: ATP_STORAGE_REGION
-            value: "{{ .Values.ATP_STORAGE_REGION }}"
+            value: "{{ .Values.deploymentlib.ATP_STORAGE_REGION }}"
           - name: ATP_STORAGE_SERVER_URL
-            value: "{{ .Values.ATP_STORAGE_SERVER_URL }}"
+            value: "{{ .Values.deploymentlib.ATP_STORAGE_SERVER_URL }}"
           - name: ATP_STORAGE_SERVER_UI_URL
-            value: "{{ .Values.ATP_STORAGE_SERVER_UI_URL }}"
+            value: "{{ .Values.deploymentlib.ATP_STORAGE_SERVER_UI_URL }}"
           - name: ATP_REPORT_VIEW_UI_URL
-            value: "{{ .Values.ATP_REPORT_VIEW_UI_URL }}"
+            value: "{{ .Values.deploymentlib.ATP_REPORT_VIEW_UI_URL }}"
           - name: ATP_RUNNER_JOB_EXIT_STRATEGY
-            value: "{{ .Values.ATP_RUNNER_JOB_EXIT_STRATEGY }}"
+            value: "{{ .Values.deploymentlib.ATP_RUNNER_JOB_EXIT_STRATEGY }}"
           - name: CURRENT_DATE
-            value: "{{ .Values.CURRENT_DATE }}"
+            value: "{{ .Values.deploymentlib.CURRENT_DATE }}"
           - name: CURRENT_TIME
-            value: "{{ .Values.CURRENT_TIME }}"
+            value: "{{ .Values.deploymentlib.CURRENT_TIME }}"
           - name: ATP_STORAGE_BUCKET
-            value: "{{ .Values.ATP_STORAGE_BUCKET }}"
+            value: "{{ .Values.deploymentlib.ATP_STORAGE_BUCKET }}"
           - name: ENABLE_JIRA_INTEGRATION
-            value: "{{ .Values.ENABLE_JIRA_INTEGRATION }}"
+            value: "{{ .Values.deploymentlib.ENABLE_JIRA_INTEGRATION }}"
           - name: MONITORING_ENABLED
-            value: "{{ .Values.MONITORING_ENABLED }}"
+            value: "{{ .Values.deploymentlib.MONITORING_ENABLED }}"
           - name: PLAYWRIGHT_TRACE_MODE
-            value: "{{ .Values.PLAYWRIGHT_TRACE_MODE }}"
+            value: "{{ .Values.deploymentlib.PLAYWRIGHT_TRACE_MODE }}"
           - name: ATP_ENVGENE_CONFIGURATION
             valueFrom:
               secretKeyRef:
