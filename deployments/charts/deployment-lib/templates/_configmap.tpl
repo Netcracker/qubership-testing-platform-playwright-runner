@@ -5,5 +5,5 @@ metadata:
   name: {{ include "deployment-lib.fullname" . }}-cm
 data:
   testParams: |
-    {{ toJson .Values.TEST_PARAMS | nindent 4 }}
+    {{ toJson .Values.deployment-lib.TEST_PARAMS | nindent 4 }}
 {{- end -}}
