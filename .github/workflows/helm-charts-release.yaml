@@ -20,7 +20,7 @@ permissions:
 env:
   release: "3.0.0"
 
-run-name: ${{ github.repository }} Release ${{ env.release }}
+run-name: ${{ github.repository }} Release ${{ github.event.env.release }}
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
