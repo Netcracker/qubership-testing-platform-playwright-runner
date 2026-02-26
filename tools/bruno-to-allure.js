@@ -161,7 +161,7 @@ try {
         { name: "parentSuite", value: parentSuite },
         { name: "suite", value: suite },
         { name: "package", value: packageName },
-        { name: "host", value: (() => { try { return new URL(test.request?.url).host } catch (e) { return "n/a"; } })() },
+        { name: "host", value: (() => { try { return new URL(test.request?.url).host } catch { return "n/a"; } })() },
         { name: "framework", value: "bruno" },
         { name: "language", value: "javascript" }
       ].filter(l => l.value !== undefined),
@@ -184,7 +184,7 @@ try {
   fs.writeFileSync(path.join(allureResultsDir, "container.json"), JSON.stringify(container, null, 2));
   // --- Write Allure Environment file ---
   const envVars = {
-  BRUNO_ENV: process.env.BRUNO_ENV || "not-set"
+    BRUNO_ENV: process.env.BRUNO_ENV || "not-set"
   };
 
   const envContent = Object.entries(envVars)
