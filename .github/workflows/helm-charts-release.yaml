@@ -18,7 +18,7 @@ permissions:
   contents: read
 
 env:
-  release: "3.0.2"
+  release: "3.0.3"
 
 run-name: ${{ github.repository }} Release ${{ github.event.env.release }}
 concurrency:

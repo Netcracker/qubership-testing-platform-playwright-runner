@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     nano \
     bash \
     jq \
+    helm \
     inotify-tools \
     && rm -rf /var/lib/apt/lists/*
 
