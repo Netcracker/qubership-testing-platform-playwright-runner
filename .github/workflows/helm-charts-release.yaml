@@ -1,4 +1,4 @@
-name: "Helm Charts Release"
+name: "Helm Charts Release NC"
 on:
   workflow_dispatch:
     inputs:
@@ -10,10 +10,7 @@ on:
 permissions:
   contents: read
 
-env:
-  release: "2.0.0"
-
-run-name: ${{ github.repository }} Release ${{ github.event.env.release }}
+run-name: ${{ github.repository }} Release ${{ inputs.release }}
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -25,7 +22,7 @@ jobs:
         id: check_tag
         uses: netcracker/qubership-workflow-hub/actions/tag-action@8d542a426ce561c7dce745f6b9cee068d1d7e101 # v2.0.10
         with:
-          tag-name: '${{ env.release }}'
+          tag-name: '${{ inputs.release }}'
           ref: ${{ github.ref }}
           create-tag: false
           check-tag: true
@@ -127,11 +124,11 @@ jobs:
 
       - name: "Chart release"
         id: update-versions
-        uses: netcracker/qubership-workflow-hub/actions/charts-values-update-action@8d542a426ce561c7dce745f6b9cee068d1d7e101 # v2.0.10
+        uses: netcracker/qubership-workflow-hub/actions/charts-values-update-action@main
         with:
-          release-version: ${{ env.release }}
+          release-version: ${{ inputs.release }}
           config-file: .github/helm-charts-release-config.yaml
-          default-tag: ${{ env.release }}
+          default-tag: ${{ inputs.release }}
           package-charts: true
           publish-charts: true
 
@@ -150,7 +147,6 @@ jobs:
             echo "chart_name: '$chart_name'"
             echo "chart_version: '$chart_version'"
           done
-          
 
   docker-build:
     name: ${{ matrix.component.name }}
@@ -167,14 +163,20 @@ jobs:
       - name: Get version for current component
         id: get-version
         env:
-          IMAGE_VER: "${{ fromJson(needs.chart-release.outputs.images-versions)[matrix.component.name] || env.release }}"
+          IMAGE_VER: "${{ fromJson(needs.chart-release.outputs.images-versions)[matrix.component.name] || inputs.release }}"
         run: |
           echo "IMAGE_VERSION=${IMAGE_VER}" >> $GITHUB_ENV
+
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          submodules: recursive
+          ref: release-${{ inputs.release }}
 
       - name: Docker build
         uses: netcracker/qubership-workflow-hub/actions/docker-action@8d542a426ce561c7dce745f6b9cee068d1d7e101 # v2.0.10
         with:
-          ref: release-${{ env.release }}
+          ref: release-${{ inputs.release }}
           download-artifact: false
           dry-run: false
           component: ${{ toJson(matrix.component) }}
@@ -195,7 +197,7 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
         with:
           fetch-depth: 0
-          ref: release-${{ env.release }}
+          ref: release-${{ inputs.release }}
           persist-credentials: true
 
       - name: "Release-drafter"
@@ -203,10 +205,10 @@ jobs:
         with:
           config-name: release-drafter-config.yml
           publish: true
-          name: ${{ env.release }}
-          tag: ${{ env.release }}
-          version: ${{ env.release }}
-          commitish: release-${{ env.release }}
+          name: ${{ inputs.release }}
+          tag: ${{ inputs.release }}
+          version: ${{ inputs.release }}
+          commitish: release-${{ inputs.release }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -217,7 +219,7 @@ jobs:
       - name: "Upload Assets"
         uses: netcracker/qubership-workflow-hub/actions/assets-action@8d542a426ce561c7dce745f6b9cee068d1d7e101 # v2.0.10
         with:
-          tag: ${{ env.release }}
+          tag: ${{ inputs.release }}
           item-path: "./*.tgz"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
