@@ -41,7 +41,8 @@ COPY package.json package-lock.json .npmrc ./
 
 RUN npm set strict-ssl=false && \
     npm ci --omit=dev
-
+    
+ENV BRU_BIN="/app/node_modules/@usebruno/cli/bin"
 ENV PATH="/app/node_modules/.bin:${PATH}"
 ENV NODE_PATH="/app/node_modules"
 
