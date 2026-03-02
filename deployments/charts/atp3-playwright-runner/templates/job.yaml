@@ -59,6 +59,12 @@ spec:
             value: "{{ .Values.CURRENT_DATE }}"
           - name: CURRENT_TIME
             value: "{{ .Values.CURRENT_TIME }}"
+          - name: PROJECT_TRACE_ID
+            value: "{{ .Values.PROJECT_TRACE_ID }}"
+          - name: OTEL_COLLECTOR_ENDPOINT
+            value: "{{ .Values.OTEL_COLLECTOR_ENDPOINT }}"
+          - name: OTEL_ENABLED
+            value: "{{ .Values.OTEL_ENABLED }}"
           - name: ATP_STORAGE_BUCKET
             value: "{{ .Values.ATP_STORAGE_BUCKET }}"
           - name: ENABLE_JIRA_INTEGRATION

@@ -14,6 +14,7 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-reco
     nano \
     bash \
     jq \
+    file \
     inotify-tools \
     && rm -rf /var/lib/apt/lists/*
 
