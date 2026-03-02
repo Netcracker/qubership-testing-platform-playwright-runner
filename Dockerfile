@@ -36,12 +36,25 @@ RUN groupadd -g 1007 runner && \
 
 WORKDIR $HOME_EX
 
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        openjdk-17-jre-headless \
+        wget \
+    && rm -rf /var/lib/apt/lists/*
 
+ENV ALLURE_VERSION=2.27.0
+
+RUN wget -q https://github.com/allure-framework/allure2/releases/download/${ALLURE_VERSION}/allure-${ALLURE_VERSION}.zip -P /tmp && \
+    unzip -q /tmp/allure-${ALLURE_VERSION}.zip -d /opt && \
+    ln -s /opt/allure-${ALLURE_VERSION}/bin/allure /usr/bin/allure && \
+    rm -rf /tmp/allure-${ALLURE_VERSION}.zip
+
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 COPY package.json package-lock.json .npmrc ./
 
 RUN npm set strict-ssl=false && \
     npm ci --omit=dev
-    
+
 ENV BRU_BIN="/app/node_modules/@usebruno/cli/bin"
 ENV PATH="/app/node_modules/.bin:${PATH}"
 ENV NODE_PATH="/app/node_modules"
