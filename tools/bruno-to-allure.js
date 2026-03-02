@@ -182,24 +182,9 @@ try {
     stop: Date.now()
   };
   fs.writeFileSync(path.join(allureResultsDir, "container.json"), JSON.stringify(container, null, 2));
-  // --- Write Allure Environment file ---
-  const envVars = {
-    BRUNO_ENV: process.env.BRUNO_ENV || "not-set"
-  };
-
-  const envContent = Object.entries(envVars)
-    .map(([k, v]) => `${k}=${v}`)
-    .join("\n");
-
-  fs.writeFileSync(
-    path.join(allureResultsDir, "environment.properties"),
-    envContent,
-    "utf8"
-  ); 
-  const files = fs.readdirSync(allureResultsDir);
-  console.log(`✅ Generated ${files.length} files in ${allureResultsDir}`);
-} catch (err) {
-  console.error("❌ Error converting Bruno -> Allure:", err);
+  console.log(`✅ Successfully converted Bruno report to Allure format. Results saved in: ${allureResultsDir}`);
+} catch (error) {
+  console.error(`❌ Error processing Bruno report: ${error.message}`);
   process.exit(1);
 }
 
