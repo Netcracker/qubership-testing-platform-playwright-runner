@@ -36,10 +36,14 @@ load_envgene
 clone_repository
 setup_runtime_environment
 start_upload_monitoring
+set +e
 run_tests
+TEST_EXIT_CODE=$?
+set -e
 generate_email_notification_json
 save_native_report "$TMP_DIR/playwright-report"
 finalize_upload
 sleep 15
 
 echo "✅ Test job finished successfully!"
+exit $TEST_EXIT_CODE
