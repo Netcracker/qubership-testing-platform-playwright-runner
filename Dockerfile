@@ -36,6 +36,11 @@ RUN groupadd -g 1007 runner && \
 
 WORKDIR $HOME_EX
 
+RUN apt-get update && \
+    apt-get install -y openjdk-17-jre && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN npm install -g allure-commandline
 
 COPY package.json package-lock.json .npmrc ./
 
