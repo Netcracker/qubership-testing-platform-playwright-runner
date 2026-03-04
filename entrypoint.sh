@@ -1,14 +1,19 @@
 #!/bin/bash
 set -e
 
+# Source tracing and logging first so all subsequent output carries a trace-id
+source /scripts/trace-init.sh
+source /scripts/logging.sh
+generate_trace_id
+
 # Main test job entrypoint script - coordinates all modules
-echo "🔧 Starting test job entrypoint script..."
-echo "📁 Working directory: $(pwd)"
-echo "📅 Timestamp: $(date)"
+log "Starting test job entrypoint script..."
+log "Working directory: $(pwd)"
+log "Timestamp: $(date)"
 
 # Set default upload method
 export UPLOAD_METHOD="${UPLOAD_METHOD:-sync}"
-echo "📤 Upload method: $UPLOAD_METHOD"
+log "Upload method: $UPLOAD_METHOD"
 
 # Import modular components
 source /scripts/init.sh
@@ -20,7 +25,7 @@ source /scripts/email-notification/generate-email-notification-json.sh
 source /scripts/native-report.sh
 
 # Execute main workflow
-echo "🚀 Starting test execution workflow..."
+log "Starting test execution workflow..."
 
 init_environment
 clone_repository
@@ -33,4 +38,4 @@ finalize_upload
 
 sleep 15
 
-echo "✅ Test job finished successfully!"
+log "Test job finished successfully!"
