@@ -6,6 +6,13 @@ source /scripts/trace-init.sh
 source /scripts/logging.sh
 generate_trace_id
 
+# Bootstrap OTel SDK for all Node.js processes so trace headers are propagated
+# on outgoing HTTP requests.  Must be set after generate_trace_id so TRACEPARENT
+# is already exported.  The ${NODE_OPTIONS:+ ...} idiom preserves any existing
+# NODE_OPTIONS value set by the caller.
+export NODE_OPTIONS="--require /app/tracing.js${NODE_OPTIONS:+ $NODE_OPTIONS}"
+log "OTel tracing bootstrap configured via NODE_OPTIONS"
+
 # Main test job entrypoint script - coordinates all modules
 log "Starting test job entrypoint script..."
 log "Working directory: $(pwd)"
