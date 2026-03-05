@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # ============================================
 # check_env_var — ensure an env var is set or compute & export it.
 #
@@ -190,15 +191,16 @@ local_run_enabled() {
 
 # Local test execution module
 local_run_tests() {
-    cd $TMP_DIR
+    cd "$TMP_DIR" || return 1
 
+     # Create Allure results directory
     echo "▶ Starting test execution..."
 
-    cp -r $WORK_DIR/tools $TMP_DIR/tools
+    cp -r "$WORK_DIR/tools" "$TMP_DIR/tools"
 
      # Create Allure results directory
     echo "📁 Creating Allure results directory..."
-    mkdir -p $TMP_DIR/allure-results
+    mkdir -p "$TMP_DIR/allure-results"
 
     # Execute test suite
     echo "🚀 Running test suite..."
@@ -210,5 +212,5 @@ local_run_tests() {
     
     echo "✅ Test execution completed"
 
-    cd $WORK_DIR
+    cd "$WORK_DIR" || return 1
 }
