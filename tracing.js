@@ -64,3 +64,7 @@ sdk.start();
 // the SDK's propagator first, then install our CompositePropagator (W3C + B3).
 propagation.disable();
 propagation.setGlobalPropagator(compositePropagator);
+
+// Exported so callers (e.g. test-tracing.js) can await sdk.shutdown() before
+// process.exit(), which flushes the BatchSpanProcessor queue to the exporter.
+module.exports = { sdk };
