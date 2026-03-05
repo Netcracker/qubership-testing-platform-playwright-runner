@@ -29,10 +29,7 @@ check_env_var() {
             exit 1
         else
             # Calculate the value
-            computed_value=$(eval "$compute_expr" 2>/dev/null)
-
-            # Checking for successful completion
-            if [ $? -ne 0 ]; then
+            if ! computed_value=$(eval "$compute_expr" 2>/dev/null); then
                 echo "❗Error calculating the value for $var_name" >&2
                 exit 1
             fi
