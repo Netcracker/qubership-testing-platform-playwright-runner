@@ -94,7 +94,7 @@ spec:
                 key: atpStoragePassword
         envFrom:
           - configMapRef:
-              name: { { include "atp3-playwright-runner.fullname" . } }-extra
+              name: {{ include "atp3-playwright-runner.fullname" . }}-extra
               optional: true
       restartPolicy: Never
   backoffLimit: 0
