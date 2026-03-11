@@ -160,6 +160,33 @@ extract_bruno_env_vars() {
         echo "${result# }"
     fi
 }
+# Extract Bruno folders from TEST_PARAMS: section "folders"
+
+extract_bruno_folders() {
+    local json_input="$1"
+    local output_var_name="$2"
+    local result_array=()
+
+    if ! echo "$json_input" | jq -e '.folders' >/dev/null 2>&1; then
+        echo "➡️ No folders defined in TEST_PARAMS"
+        eval "$output_var_name=()"
+        return
+    fi
+
+    readarray -t result_array < <(echo "$json_input" | jq -r '.folders[]')
+
+    q=''
+    for x in "${result_array[@]}"; do
+        q+=$(printf ' %q' "$x")
+    done
+    eval "$output_var_name=(${q# })"
+
+    local output_message="➡️ Extracted Bruno folders:"
+    for folder in "${result_array[@]}"; do
+        output_message+="\n    - $folder"
+    done
+    echo -e "$output_message"
+}
 
 # Return:
 #   0 — if LOCAL_RUN=true
