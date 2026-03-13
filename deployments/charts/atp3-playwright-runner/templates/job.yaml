@@ -92,5 +92,9 @@ spec:
               secretKeyRef:
                 name: {{ include "atp3-playwright-runner.fullname" . }}-secret
                 key: atpStoragePassword
+        envFrom:
+          - configMapRef:
+              name: {{ include "atp3-playwright-runner.fullname" . }}-extra
+              optional: true
       restartPolicy: Never
   backoffLimit: 0
