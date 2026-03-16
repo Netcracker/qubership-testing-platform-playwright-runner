@@ -7,6 +7,7 @@ const { v4: uuidv4 } = require("uuid");
 const args = process.argv.slice(2);
 const brunoReportPath = args[0];
 const allureResultsDir = args[1] || path.join(__dirname, "allure-results");
+const collectionName = args[2] || "unknown-collection";
 
 // ensure dir
 if (!fs.existsSync(allureResultsDir)) fs.mkdirSync(allureResultsDir, { recursive: true });
@@ -124,14 +125,16 @@ try {
     const duration = test.response?.responseTime ?? test.duration ?? 0;
 
     const parts = splitPathParts(test.path);
-    const parentSuite = parts[0] || "API Tests";
-    const suite = parts[1] || parts[0] || "API Tests";
-    const packageName = parts.length ? parts.join(".") : "bruno.tests";
+
+    const parentSuite = "Bruno";
+    const suite = collectionName;
+    const subSuite = parts.length > 1 ? parts.slice(0, -1).join(" / ") : undefined;
+    const packageName = `${collectionName}.${parts.join(".")}`;
 
     const { steps, assertionsFailed, failedAssertions } = createSteps(test, id, timestamp, duration);
 
     const initialStatus =
-      test.status === "pass" ? "passed" : "passed";
+      test.status === "pass" ? "passed" : "failed";
 
     const finalStatus = assertionsFailed ? "failed" : initialStatus;
 
@@ -160,6 +163,7 @@ try {
       labels: [
         { name: "parentSuite", value: parentSuite },
         { name: "suite", value: suite },
+        ...(subSuite ? [{ name: "subSuite", value: subSuite }] : []),
         { name: "package", value: packageName },
         { name: "host", value: (() => { try { return new URL(test.request?.url).host } catch { return "n/a"; } })() },
         { name: "framework", value: "bruno" },
@@ -181,7 +185,10 @@ try {
     start: Date.now(),
     stop: Date.now()
   };
-  fs.writeFileSync(path.join(allureResultsDir, "container.json"), JSON.stringify(container, null, 2));
+  fs.writeFileSync(
+    path.join(allureResultsDir, `${uuidv4()}-container.json`),
+    JSON.stringify(container, null, 2)
+  );
   console.log(`✅ Successfully converted Bruno report to Allure format. Results saved in: ${allureResultsDir}`);
 } catch (error) {
   console.error(`❌ Error processing Bruno report: ${error.message}`);
