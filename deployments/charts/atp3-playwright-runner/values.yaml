@@ -23,8 +23,8 @@ MONITORING_ENABLED: false
 PLAYWRIGHT_TRACE_MODE: "retain-on-failure"
 SECURITY_CONTEXT_ENABLED: false
 podSecurityContext:
-  runAsUser: 1000
-  fsGroup: 1000
+  runAsUser: 1007
+  fsGroup: 1007
 containerSecurityContext: {}
 affinity: {}
 tolerations: []
