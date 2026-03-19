@@ -23,7 +23,8 @@
     "exceljs": "4.4.0",
     "js-yaml": "4.1.0",
     "jsondiffpatch": "^0.7.3",
-    "newman": "6.2.1"
+    "newman": "6.2.1",
+    "playwright-bdd": "5.4.0"
   },
   "dependencies": {
     "@usebruno/cli": "2.10.0",

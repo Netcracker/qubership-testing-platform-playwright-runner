@@ -126,7 +126,7 @@ try {
 
     const parts = splitPathParts(test.path);
 
-    const parentSuite = "Bruno";
+    const parentSuite = "Backend (Bruno)";
     const suite = collectionName;
     const subSuite = parts.length > 1 ? parts.slice(0, -1).join(" / ") : undefined;
     const packageName = `${collectionName}.${parts.join(".")}`;
