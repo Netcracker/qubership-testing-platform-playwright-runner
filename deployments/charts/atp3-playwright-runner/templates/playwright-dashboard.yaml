@@ -1,4 +1,4 @@
-{{- if and .Values.ATP_MONITORING_ENABLED (not (lookup "integreatly.org/v1alpha1" "GrafanaDashboard" .Release.Namespace "atp3-runner-dashboard")) }}
+{{- if .Values.ATP_MONITORING_ENABLED }}
 apiVersion: integreatly.org/v1alpha1
 kind: GrafanaDashboard
 metadata:
@@ -7,8 +7,6 @@ metadata:
     app: '{{ .Values.SERVICE_NAME }}'
     name: '{{ .Values.SERVICE_NAME }}'
     app.kubernetes.io/component: monitoring
-  annotations:
-    helm.sh/resource-policy: keep
 spec:
   name: atp3_runner_dashboard.json
   json: |+
