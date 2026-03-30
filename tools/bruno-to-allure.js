@@ -1,7 +1,9 @@
 #!/usr/bin/env node
-/* eslint-env node */
+/* global require, process, __dirname, console */
+
 const fs = require("fs");
 const path = require("path");
+const { URL } = require("node:url");
 const { v4: uuidv4 } = require("uuid");
 
 // args: brunoReportPath, allureResultsDir
