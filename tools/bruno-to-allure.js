@@ -117,10 +117,14 @@ function createSteps(test, id) {
 try {
   const raw = fs.readFileSync(brunoReportPath, "utf8");
   const brunoReport = JSON.parse(raw);
-  let results;
+  let results = [];
 
   if (Array.isArray(brunoReport)) {
-    results = brunoReport;
+    if (brunoReport.every(item => item && Array.isArray(item.results))) {
+      results = brunoReport.flatMap(item => item.results);
+    } else {
+      results = brunoReport;
+    }
   } else if (brunoReport && Array.isArray(brunoReport.results)) {
     results = brunoReport.results;
   } else {
