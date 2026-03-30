@@ -114,12 +114,18 @@ function createSteps(test, id) {
 try {
   const raw = fs.readFileSync(brunoReportPath, "utf8");
   const brunoReport = JSON.parse(raw);
-  const report = Array.isArray(brunoReport) ? brunoReport[0] : brunoReport;
+  let results;
 
-  if (!report || !report.results) throw new Error("Invalid Bruno report format");
+  if (Array.isArray(brunoReport)) {
+    results = brunoReport;
+  } else if (brunoReport && Array.isArray(brunoReport.results)) {
+    results = brunoReport.results;
+  } else {
+    throw new Error("Invalid Bruno report format");
+  }
 
   const children = [];
-  for (const test of report.results) {
+  for (const test of results) {
     const id = uuidv4();
     const timestamp = test.timestamp ? new Date(test.timestamp).getTime() : Date.now();
     const duration = test.response?.responseTime ?? test.duration ?? 0;
