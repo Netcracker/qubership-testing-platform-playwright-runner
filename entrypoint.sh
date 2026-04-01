@@ -28,6 +28,26 @@ source /scripts/native-report.sh
 # shellcheck disable=SC1091
 source /scripts/envgene.sh
 
+FINALIZE_DONE=false
+
+finalize_once() {
+  local rc=$?
+
+  if [ "$FINALIZE_DONE" != "true" ]; then
+    FINALIZE_DONE=true
+    echo "🔄 EXIT trap triggered with rc=$rc"
+
+    set +e
+    generate_email_notification_json
+    save_native_report "$TMP_DIR/playwright-report"
+    finalize_upload
+    sleep 15
+    set -e
+  fi
+}
+
+trap 'finalize_once' EXIT
+
 # Execute main workflow
 echo "🚀 Starting test execution workflow..."
 
@@ -36,14 +56,11 @@ load_envgene
 clone_repository
 setup_runtime_environment
 start_upload_monitoring
+
 set +e
 run_tests
 TEST_EXIT_CODE=$?
 set -e
-generate_email_notification_json
-save_native_report "$TMP_DIR/playwright-report"
-finalize_upload
-sleep 15
 
 echo "✅ Test job finished successfully!"
 echo "Tests finished with code: $TEST_EXIT_CODE"
