@@ -63,8 +63,8 @@ spec:
             value: "{{ .Values.ATP_STORAGE_BUCKET }}"
           - name: ENABLE_JIRA_INTEGRATION
             value: "{{ .Values.ENABLE_JIRA_INTEGRATION }}"
-          - name: MONITORING_ENABLED
-            value: "{{ .Values.MONITORING_ENABLED }}"
+          - name: ATP_MONITORING_ENABLED
+            value: "{{ .Values.ATP_MONITORING_ENABLED }}"
           - name: PLAYWRIGHT_TRACE_MODE
             value: "{{ .Values.PLAYWRIGHT_TRACE_MODE }}"
           - name: ATP_ENVGENE_CONFIGURATION
@@ -92,5 +92,9 @@ spec:
               secretKeyRef:
                 name: {{ include "atp3-playwright-runner.fullname" . }}-secret
                 key: atpStoragePassword
+        envFrom:
+          - configMapRef:
+              name: {{ include "atp3-playwright-runner.fullname" . }}-extra
+              optional: true
       restartPolicy: Never
   backoffLimit: 0
