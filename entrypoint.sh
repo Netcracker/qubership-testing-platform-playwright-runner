@@ -29,7 +29,7 @@ source /scripts/native-report.sh
 source /scripts/envgene.sh
 
 FINALIZE_DONE=false
-
+#shellcheck disable=SC2329
 finalize_once() {
   local rc=$?
 
