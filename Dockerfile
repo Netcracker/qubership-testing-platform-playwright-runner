@@ -2,8 +2,7 @@ FROM mcr.microsoft.com/playwright:v1.58.2-noble
 
 ENV HOME_EX=/app
 ENV BRU_BIN="/app/node_modules/@usebruno/cli/bin"
-ENV PATH="/app/node_modules/.bin:${PATH}"
-ENV NODE_PATH="/app/node_modules"
+
 
 RUN rm -f /etc/apt/sources.list.d/* && \
     echo "deb http://archive.ubuntu.com/ubuntu noble main multiverse restricted universe" > /etc/apt/sources.list && \
