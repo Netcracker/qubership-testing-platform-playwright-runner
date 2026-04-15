@@ -18,6 +18,7 @@ RUN rm -f /etc/apt/sources.list.d/* && \
         bash \
         jq \
         inotify-tools \
+        patch \
         openssh-client \
         sshpass \
         postgresql-client \
