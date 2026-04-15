@@ -219,7 +219,8 @@ local_run_tests() {
 
      # Create Allure results directory
     echo "▶ Starting test execution..."
-
+    export NODE_PATH=/app/node_modules
+    
     cp -r "$WORK_DIR/tools" "$TMP_DIR/tools"
 
      # Create Allure results directory
