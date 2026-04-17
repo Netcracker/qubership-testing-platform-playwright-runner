@@ -78,7 +78,7 @@ extract_bruno_collections() {
     local result_array=()
 
     # Retrieve the array of collections and save it to a temporary array
-    readarray -t result_array < <(echo "$json_input" | jq -r '.collections[]')
+    readarray -t result_array < <(echo "$json_input" | jq -r '.collections[]?')
 
     # Export the array to a variable with a specified name
     q=''
@@ -220,7 +220,7 @@ local_run_tests() {
      # Create Allure results directory
     echo "▶ Starting test execution..."
     export NODE_PATH=/app/node_modules
-    
+
     cp -r "$WORK_DIR/tools" "$TMP_DIR/tools"
 
      # Create Allure results directory
