@@ -39,6 +39,7 @@ finalize_once() {
 
     set +e
     generate_email_notification_json
+    push_metrics || true
     save_native_report "$TMP_DIR/playwright-report"
     finalize_upload
     sleep 15
@@ -56,6 +57,7 @@ load_envgene
 clone_repository
 setup_runtime_environment
 start_upload_monitoring
+push_metrics_start || true
 
 set +e
 run_tests
