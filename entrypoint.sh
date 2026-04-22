@@ -54,6 +54,7 @@ echo "🚀 Starting test execution workflow..."
 init_environment
 load_envgene
 clone_repository
+render_environment_configuration
 setup_runtime_environment
 start_upload_monitoring
 

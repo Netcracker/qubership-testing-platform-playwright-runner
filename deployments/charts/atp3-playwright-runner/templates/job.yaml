@@ -67,16 +67,8 @@ spec:
             value: "{{ .Values.ATP_MONITORING_ENABLED }}"
           - name: PLAYWRIGHT_TRACE_MODE
             value: "{{ .Values.PLAYWRIGHT_TRACE_MODE }}"
-          - name: ATP_ENVGENE_CONFIGURATION
-            valueFrom:
-              secretKeyRef:
-                name: {{ include "atp3-playwright-runner.fullname" . }}-secret
-                key: atpEnvgeneConfiguration
           - name: TEST_PARAMS
-            valueFrom:
-              configMapKeyRef:
-                name: {{ include "atp3-playwright-runner.fullname" . }}-cm
-                key: testParams
+            value: "{{ toJson .Values.TEST_PARAMS }}"
           - name: ATP_TESTS_GIT_TOKEN
             valueFrom:
               secretKeyRef:
@@ -92,7 +84,29 @@ spec:
               secretKeyRef:
                 name: {{ include "atp3-playwright-runner.fullname" . }}-secret
                 key: atpStoragePassword
+          - name: DEFAULT_TENANT_ADMIN_LOGIN
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "atp3-playwright-runner.fullname" . }}-secret
+                key: defaultTenantAdminLogin
+          - name: DEFAULT_TENANT_ADMIN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "atp3-playwright-runner.fullname" . }}-secret
+                key: defaultTenantAdminPassword
+          - name: DEFAULT_TENANT_NAME
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "atp3-playwright-runner.fullname" . }}-secret
+                key: defaultTenantName
+          - name: CONSUL_ADMIN_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "atp3-playwright-runner.fullname" . }}-secret
+                key: consulAdminToken
         envFrom:
+          - configMapRef:
+              name: {{ include "atp3-playwright-runner.fullname" . }}-cm
           - configMapRef:
               name: {{ include "atp3-playwright-runner.fullname" . }}-extra
               optional: true
