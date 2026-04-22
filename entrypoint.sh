@@ -27,6 +27,10 @@ source /scripts/email-notification/generate-email-notification-json.sh
 source /scripts/native-report.sh
 # shellcheck disable=SC1091
 source /scripts/envgene.sh
+# shellcheck disable=SC1091
+source /scripts/push-metrics.sh
+# shellcheck disable=SC1091
+source /scripts/push-metrics-start.sh
 
 FINALIZE_DONE=false
 #shellcheck disable=SC2329
