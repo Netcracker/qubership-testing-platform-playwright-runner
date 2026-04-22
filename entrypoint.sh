@@ -64,4 +64,3 @@ set -e
 
 echo "✅ Test job finished successfully!"
 echo "Tests finished with code: $TEST_EXIT_CODE"
-exit 0
