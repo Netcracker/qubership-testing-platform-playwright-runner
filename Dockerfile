@@ -16,6 +16,7 @@ RUN rm -f /etc/apt/sources.list.d/* && \
         nano \
         bash \
         jq \
+        file \
         inotify-tools \
         openssh-client \
         sshpass \
@@ -38,10 +39,11 @@ RUN groupadd -g 1007 runner && \
 WORKDIR $HOME_EX
 
 COPY package.json package-lock.json .npmrc ./
-
+COPY lib/ ./lib/
 RUN npm install -g npm@11.10.1 --no-fund --no-audit
 
 RUN npm set strict-ssl=false && \
+    npm init -y && \
     npm ci
 
 RUN chown -R runner:runner $HOME_EX
@@ -50,6 +52,7 @@ COPY --chown=runner:runner scripts/ /scripts/
 COPY --chown=runner:runner scripts/runtimes/playwright-setup.sh /scripts/runtime-setup.sh
 COPY --chown=runner:runner --chmod=755 entrypoint.sh /app/entrypoint.sh
 COPY --chown=runner:runner tools/ /app/tools/
+COPY --chown=runner:runner tracing.js /app/tracing.js
 
 RUN chmod -R 755 /scripts /app/tools
 

@@ -1,14 +1,18 @@
 #!/bin/bash
 set -e
 
+# Source tracing and logging first so all subsequent output carries a trace-id
+source /scripts/trace-init.sh
+source /scripts/logging.sh
+
 # Main test job entrypoint script - coordinates all modules
-echo "🔧 Starting test job entrypoint script..."
-echo "📁 Working directory: $(pwd)"
-echo "📅 Timestamp: $(date)"
+log "Starting test job entrypoint script..."
+log "Working directory: $(pwd)"
+log "Timestamp: $(date)"
 
 # Set default upload method
 export UPLOAD_METHOD="${UPLOAD_METHOD:-sync}"
-echo "📤 Upload method: $UPLOAD_METHOD"
+log "Upload method: $UPLOAD_METHOD"
 
 # Import modular components
 # shellcheck disable=SC1091
@@ -54,7 +58,7 @@ finalize_once() {
 trap 'finalize_once' EXIT
 
 # Execute main workflow
-echo "🚀 Starting test execution workflow..."
+log "Starting test execution workflow..."
 
 init_environment
 load_envgene
@@ -68,6 +72,6 @@ run_tests
 TEST_EXIT_CODE=$?
 set -e
 
-echo "✅ Test job finished successfully!"
-echo "Tests finished with code: $TEST_EXIT_CODE"
+log "✅ Test job finished successfully!"
+log "Tests finished with code: $TEST_EXIT_CODE"
 exit 0
