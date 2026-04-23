@@ -68,7 +68,7 @@ spec:
           - name: PLAYWRIGHT_TRACE_MODE
             value: "{{ .Values.PLAYWRIGHT_TRACE_MODE }}"
           - name: TEST_PARAMS
-            value: "{{ toJson .Values.TEST_PARAMS }}"
+            value: {{ toJson .Values.TEST_PARAMS | quote }}
           - name: ATP_TESTS_GIT_TOKEN
             valueFrom:
               secretKeyRef:
