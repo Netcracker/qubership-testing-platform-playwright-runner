@@ -21,6 +21,7 @@ TEST_PARAMS: {}
 ENABLE_JIRA_INTEGRATION: false
 ATP_MONITORING_ENABLED: false
 PLAYWRIGHT_TRACE_MODE: "retain-on-failure"
+DEBUG_MODE: false
 SECURITY_CONTEXT_ENABLED: false
 podSecurityContext:
   runAsUser: 1007

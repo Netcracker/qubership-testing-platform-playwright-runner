@@ -67,6 +67,8 @@ spec:
             value: "{{ .Values.ENABLE_JIRA_INTEGRATION }}"
           - name: ATP_MONITORING_ENABLED
             value: "{{ .Values.ATP_MONITORING_ENABLED }}"
+          - name: DEBUG_MODE
+            value: "{{ .Values.DEBUG_MODE }}"
           - name: PLAYWRIGHT_TRACE_MODE
             value: "{{ .Values.PLAYWRIGHT_TRACE_MODE }}"
           - name: TEST_PARAMS
