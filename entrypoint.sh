@@ -27,6 +27,8 @@ source /scripts/email-notification/generate-email-notification-json.sh
 source /scripts/native-report.sh
 # shellcheck disable=SC1091
 source /scripts/envgene.sh
+# shellcheck disable=SC1091
+source /scripts/render-environment-configuration.sh
 
 FINALIZE_DONE=false
 #shellcheck disable=SC2329
@@ -52,9 +54,9 @@ trap 'finalize_once' EXIT
 echo "🚀 Starting test execution workflow..."
 
 init_environment
-load_envgene
 clone_repository
 render_environment_configuration
+load_envgene
 setup_runtime_environment
 start_upload_monitoring
 
