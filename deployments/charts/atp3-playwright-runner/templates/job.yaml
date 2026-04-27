@@ -73,6 +73,11 @@ spec:
             value: "{{ .Values.PLAYWRIGHT_TRACE_MODE }}"
           - name: TEST_PARAMS
             value: {{ toJson .Values.TEST_PARAMS | quote }}
+          - name: ATP_ENVGENE_CONFIGURATION
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "atp3-playwright-runner.fullname" . }}-secret
+                key: atpEnvgeneConfiguration
           - name: ATP_TESTS_GIT_TOKEN
             valueFrom:
               secretKeyRef:
