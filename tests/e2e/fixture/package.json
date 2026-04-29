@@ -1,0 +1,12 @@
+{
+  "name": "playwright-runner-smoke-fixture",
+  "version": "1.0.0",
+  "description": "Minimal Playwright fixture used by e2e smoke tests for the runner image",
+  "private": true,
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.58.2"
+  }
+}

@@ -16,6 +16,7 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-reco
     bash \
     jq \
     inotify-tools \
+    dos2unix \
     && rm -rf /var/lib/apt/lists/*
 
 RUN curl -L -o /tmp/s5cmd.tar.gz \
@@ -44,7 +45,8 @@ COPY --chown=runner:runner scripts/ /scripts/
 COPY --chown=runner:runner scripts/runtimes/playwright-setup.sh /scripts/runtime-setup.sh
 COPY --chown=runner:runner --chmod=755 entrypoint.sh /app/entrypoint.sh
 
-RUN chmod -R 755 /scripts
+RUN find /scripts /app/entrypoint.sh -type f | xargs dos2unix && \
+    chmod -R 755 /scripts
 
 USER 1007
 
