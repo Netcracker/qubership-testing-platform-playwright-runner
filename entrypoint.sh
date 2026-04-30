@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 # Main test job entrypoint script - coordinates all modules
 echo "🔧 Starting test job entrypoint script..."
@@ -12,6 +11,8 @@ echo "📤 Upload method: $UPLOAD_METHOD"
 
 # Import modular components
 # shellcheck disable=SC1091
+source /scripts/error-handler.sh
+# shellcheck disable=SC1091
 source /scripts/init.sh
 # shellcheck disable=SC1091
 source /scripts/git-clone.sh
@@ -20,6 +21,8 @@ source /scripts/runtime-setup.sh
 # shellcheck disable=SC1091
 source /scripts/test-runner.sh
 # shellcheck disable=SC1091
+source /scripts/test-runner-bruno.sh
+# shellcheck disable=SC1091
 source /scripts/upload-monitor.sh
 # shellcheck disable=SC1091
 source /scripts/email-notification/generate-email-notification-json.sh
@@ -27,40 +30,27 @@ source /scripts/email-notification/generate-email-notification-json.sh
 source /scripts/native-report.sh
 # shellcheck disable=SC1091
 source /scripts/envgene.sh
-
-FINALIZE_DONE=false
-#shellcheck disable=SC2329
-finalize_once() {
-  local rc=$?
-
-  if [ "$FINALIZE_DONE" != "true" ]; then
-    FINALIZE_DONE=true
-    echo "🔄 EXIT trap triggered with rc=$rc"
-
-    set +e
-    generate_email_notification_json
-    save_native_report "$TMP_DIR/playwright-report"
-    finalize_upload
-    sleep 15
-    set -e
-  fi
-}
-
-trap 'finalize_once' EXIT
+# shellcheck disable=SC1091
+source /scripts/render-environment-configuration.sh
 
 # Execute main workflow
 echo "🚀 Starting test execution workflow..."
 
-init_environment
-load_envgene
-clone_repository
-setup_runtime_environment
-start_upload_monitoring
+# Runner-specific report directory consumed by finalize_once() in error-handler.sh.
+# Override this in other runners (e.g. python-runner) before the trap fires.
+# shellcheck disable=SC2034
+NATIVE_REPORT_DIR="playwright-report"
 
-set +e
-run_tests
-TEST_EXIT_CODE=$?
-set -e
+# finalize_once() is defined in error-handler.sh (sourced above).
+# Register it here after all scripts are sourced so every function it calls is available.
+trap 'finalize_once' EXIT
+
+init_environment              || fail "Environment initialization failed"
+clone_repository              || fail "Repository clone failed"
+render_environment_configuration || fail "Render Environment Configuration Failed"
+load_envgene || fail "Load Envgen Failed"
+setup_runtime_environment     || fail "Runtime setup failed"
+start_upload_monitoring
+run_tests                     || fail "Test runner failed"
 
 echo "✅ Test job finished successfully!"
-echo "Tests finished with code: $TEST_EXIT_CODE"
