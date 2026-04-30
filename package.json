@@ -1,6 +1,6 @@
 {
   "name": "@qubership/atp3-playwright-runner",
-  "version": "0.0.21",
+  "version": "0.1.0",
   "description": "",
   "main": "playwright.config.js",
   "directories": {

@@ -38,6 +38,7 @@ echo "🚀 Starting test execution workflow..."
 
 # Runner-specific report directory consumed by finalize_once() in error-handler.sh.
 # Override this in other runners (e.g. python-runner) before the trap fires.
+# shellcheck disable=SC2034
 NATIVE_REPORT_DIR="playwright-report"
 
 # finalize_once() is defined in error-handler.sh (sourced above).
