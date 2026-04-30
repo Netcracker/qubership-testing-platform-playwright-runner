@@ -33,8 +33,6 @@ source /scripts/envgene.sh
 # shellcheck disable=SC1091
 source /scripts/render-environment-configuration.sh
 
-trap 'finalize_once' EXIT
-
 # Execute main workflow
 echo "🚀 Starting test execution workflow..."
 

@@ -1,4 +1,3 @@
 [submodule "scripts"]
 	path = scripts
 	url = https://github.com/Netcracker/qubership-testing-platform-common-scripts
-	branch = bug/test-run-hangs-on-pod-non-zero-exit

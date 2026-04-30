@@ -21,7 +21,7 @@
     "@playwright/test": "1.58.2",
     "@types/node": "22.14.1",
     "allure-playwright": "3.6.0",
-    "axios": "1.7.7",
+    "axios": "1.15.0",
     "consul": "2.0.1",
     "csv-parse": "6.0.0",
     "daff": "1.4.2",
