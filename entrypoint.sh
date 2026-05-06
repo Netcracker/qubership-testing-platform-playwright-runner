@@ -32,6 +32,10 @@ source /scripts/native-report.sh
 source /scripts/envgene.sh
 # shellcheck disable=SC1091
 source /scripts/render-environment-configuration.sh
+# shellcheck disable=SC1091
+source /scripts/push-metrics.sh
+# shellcheck disable=SC1091
+source /scripts/push-metrics-start.sh
 
 # Execute main workflow
 echo "🚀 Starting test execution workflow..."
@@ -51,6 +55,7 @@ render_environment_configuration || fail "Render Environment Configuration Faile
 load_envgene || fail "Load Envgen Failed"
 setup_runtime_environment     || fail "Runtime setup failed"
 start_upload_monitoring
+push_metrics_start || true
 run_tests                     || fail "Test runner failed"
 
 echo "✅ Test job finished successfully!"
