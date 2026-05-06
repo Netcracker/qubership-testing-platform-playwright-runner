@@ -125,17 +125,17 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: {{ include "atp3-playwright-runner.fullname" . }}-secret
-                key: metricsVmUser
+                key: atpMetricsUser
           - name: ATP_METRICS_PASS
             valueFrom:
               secretKeyRef:
                 name: {{ include "atp3-playwright-runner.fullname" . }}-secret
-                key: metricsVmPass
+                key: atpMetricsPass
           - name: ATP_METRICS_TOKEN
             valueFrom:
               secretKeyRef:
                 name: {{ include "atp3-playwright-runner.fullname" . }}-secret
-                key: metricsVmToken
+                key: atpMetricsToken
         envFrom:
           - configMapRef:
               name: {{ include "atp3-playwright-runner.fullname" . }}-cm
