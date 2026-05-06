@@ -1,13 +1,17 @@
 #!/bin/bash
 
+# Source tracing and logging first so all subsequent output carries a trace-id
+source /scripts/trace-init.sh
+source /scripts/logging.sh
+
 # Main test job entrypoint script - coordinates all modules
-echo "🔧 Starting test job entrypoint script..."
-echo "📁 Working directory: $(pwd)"
-echo "📅 Timestamp: $(date)"
+log "Starting test job entrypoint script..."
+log "Working directory: $(pwd)"
+log "Timestamp: $(date)"
 
 # Set default upload method
 export UPLOAD_METHOD="${UPLOAD_METHOD:-sync}"
-echo "📤 Upload method: $UPLOAD_METHOD"
+log "Upload method: $UPLOAD_METHOD"
 
 # Import modular components
 # shellcheck disable=SC1091
@@ -38,7 +42,7 @@ source /scripts/push-metrics.sh
 source /scripts/push-metrics-start.sh
 
 # Execute main workflow
-echo "🚀 Starting test execution workflow..."
+log "🚀 Starting test execution workflow..."
 
 # Runner-specific report directory consumed by finalize_once() in error-handler.sh.
 # Override this in other runners (e.g. python-runner) before the trap fires.
@@ -58,4 +62,4 @@ start_upload_monitoring
 push_metrics_start || true
 run_tests                     || fail "Test runner failed"
 
-echo "✅ Test job finished successfully!"
+log "✅ Test job finished successfully!"

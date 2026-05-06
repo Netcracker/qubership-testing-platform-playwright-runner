@@ -30,6 +30,9 @@ ATP_METRICS_PASS: ""
 ATP_METRICS_TOKEN: ""
 PLAYWRIGHT_TRACE_MODE: "retain-on-failure"
 DEBUG_MODE: false
+OTEL_EXPORTER_OTLP_ENDPOINT: ""
+OTEL_SERVICE_NAME: "atp3-playwright-runner"
+ATP_PROJECT_ID: ""
 SECURITY_CONTEXT_ENABLED: false
 podSecurityContext:
   runAsUser: 1007

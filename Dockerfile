@@ -15,6 +15,7 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-reco
     nano \
     bash \
     jq \
+    file \
     inotify-tools \
     && rm -rf /var/lib/apt/lists/*
 
@@ -33,6 +34,7 @@ RUN groupadd -g 1007 runner && \
 WORKDIR $HOME_EX
 
 COPY package.json package-lock.json .npmrc ./
+COPY lib/ ./lib/
 RUN npm install -g npm@11.10.1 --no-fund --no-audit
 RUN npm set strict-ssl=false && \
     npm init -y && \
@@ -43,6 +45,7 @@ RUN chown -R runner:runner $HOME_EX
 COPY --chown=runner:runner scripts/ /scripts/
 COPY --chown=runner:runner scripts/runtimes/playwright-setup.sh /scripts/runtime-setup.sh
 COPY --chown=runner:runner --chmod=755 entrypoint.sh /app/entrypoint.sh
+COPY --chown=runner:runner tracing.js /app/tracing.js
 
 RUN chmod -R 755 /scripts
 
