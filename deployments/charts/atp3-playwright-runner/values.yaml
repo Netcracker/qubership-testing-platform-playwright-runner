@@ -31,6 +31,7 @@ ATP_METRICS_TOKEN: ""
 PLAYWRIGHT_TRACE_MODE: "retain-on-failure"
 DEBUG_MODE: false
 SECURITY_CONTEXT_ENABLED: false
+EXTRA_VARS: ""
 podSecurityContext:
   runAsUser: 1007
   fsGroup: 1007
