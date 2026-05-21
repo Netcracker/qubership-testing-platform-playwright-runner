@@ -83,6 +83,8 @@ spec:
             value: {{ toJson .Values.TEST_PARAMS | quote }}
           - name: EXTRA_VARS
             value: "{{ .Values.EXTRA_VARS }}"
+          - name: TRIGGER_AUTHOR
+            value: "{{ .Values.TRIGGER_AUTHOR }}"
           - name: ATP_ENVGENE_CONFIGURATION
             valueFrom:
               secretKeyRef:
