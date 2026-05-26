@@ -32,6 +32,8 @@ PLAYWRIGHT_TRACE_MODE: "retain-on-failure"
 DEBUG_MODE: false
 SECURITY_CONTEXT_ENABLED: false
 EXTRA_VARS: ""
+OTEL_EXPORTER_OTLP_ENDPOINT: ""
+OTEL_SERVICE_NAME: "atp3-playwright-runner"
 ATP_PROJECT_ID: ""
 podSecurityContext:
   runAsUser: 1007

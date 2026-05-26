@@ -83,6 +83,10 @@ spec:
             value: {{ toJson .Values.TEST_PARAMS | quote }}
           - name: EXTRA_VARS
             value: "{{ .Values.EXTRA_VARS }}"
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "{{ .Values.OTEL_EXPORTER_OTLP_ENDPOINT }}"
+          - name: OTEL_SERVICE_NAME
+            value: "{{ .Values.OTEL_SERVICE_NAME }}"
           - name: ATP_PROJECT_ID
             value: "{{ .Values.ATP_PROJECT_ID }}"
           - name: ATP_ENVGENE_CONFIGURATION
