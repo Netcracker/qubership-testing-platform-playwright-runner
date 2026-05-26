@@ -1,0 +1,95 @@
+version: '3.3'
+
+# Docker Compose — Local OTel Tracing Test (Approach B)
+#
+# Starts three services:
+#   echo-server  — captures incoming HTTP headers and logs them to stdout
+#   jaeger       — OTLP HTTP receiver (:4318) + browser UI (:16686)
+#   runner       — playwright runner image with overridden entrypoint that
+#                  runs test-tracing.js (verifies header injection + exports spans)
+#
+# Usage (from WSL, project root):
+#   docker-compose -f docker-compose.tracing-test.yml up --build
+#
+# Then:
+#   • http://localhost:16686  → Jaeger UI (search service "atp3-playwright-runner-local")
+#   • docker logs echo-server → see injected headers on each HTTP request
+#
+# To reuse the existing image without rebuilding:
+#   IMAGE=qb-playwright-1:latest docker-compose -f docker-compose.tracing-test.yml up
+#
+# To clean up:
+#   docker-compose -f docker-compose.tracing-test.yml down
+
+services:
+
+  # ── HTTP echo server ───────────────────────────────────────────────────────
+  # Logs every incoming request (including all headers) to stdout.
+  # The runner sends one GET request here; check output with:
+  #   docker-compose -f docker-compose.tracing-test.yml logs echo-server
+  echo-server:
+    image: mendhak/http-https-echo:35
+    ports:
+      - "8080:8080"
+    environment:
+      HTTP_PORT: "8080"
+
+  # ── Jaeger all-in-one ──────────────────────────────────────────────────────
+  # Accepts OTLP/HTTP spans on port 4318.
+  # UI available at http://localhost:16686 after startup.
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"   # Jaeger UI
+      - "4318:4318"     # OTLP HTTP receiver
+
+  # ── Playwright runner (tracing verification only) ─────────────────────────
+  # Overrides the normal entrypoint so it runs only the tracing test instead
+  # of the full test job workflow (no git clone, no test suite needed).
+  runner:
+    image: qb-playwright-3:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - echo-server
+      - jaeger
+    volumes:
+      # Mount both scripts so edits take effect without rebuilding the image
+      - ./test-tracing.js:/app/test-tracing.js:ro
+      - ./tracing.js:/app/tracing.js:ro
+    environment:
+      # OTel exporter points at the local Jaeger OTLP receiver
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4318"
+      OTEL_SERVICE_NAME: "atp3-playwright-runner-local"
+      # Optional: override project ID used in trace-id generation
+      ATP_PROJECT_ID: "1"
+      # Pass through any extra NODE_OPTIONS from the host (appended in entrypoint)
+      NODE_OPTIONS: ""
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        set -e
+        source /scripts/trace-init.sh
+        source /scripts/logging.sh
+        generate_trace_id
+
+        echo ""
+        echo "========================================="
+        echo "  OTel Tracing — Docker Verification"
+        echo "========================================="
+        echo "TRACEPARENT     = $${TRACEPARENT}"
+        echo "X_B3_TRACEID    = $${X_B3_TRACEID}"
+        echo "OTLP endpoint   = $${OTEL_EXPORTER_OTLP_ENDPOINT}"
+        echo ""
+
+        export NODE_OPTIONS="--require /app/tracing.js"
+        log "NODE_OPTIONS: $${NODE_OPTIONS}"
+        log "Running header-injection verification..."
+        echo ""
+
+        # Wait briefly for Jaeger and echo-server to be ready
+        sleep 2
+
+        node /app/test-tracing.js
