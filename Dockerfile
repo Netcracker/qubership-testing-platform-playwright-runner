@@ -14,6 +14,7 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-reco
     unzip \
     nano \
     bash \
+    file \
     jq \
     inotify-tools \
     && rm -rf /var/lib/apt/lists/*
@@ -40,11 +41,10 @@ RUN npm set strict-ssl=false && \
 
 RUN chown -R runner:runner $HOME_EX
 
-COPY --chown=runner:runner scripts/ /scripts/
+COPY --chown=runner:runner --chmod=755 scripts/ /scripts/
 COPY --chown=runner:runner scripts/runtimes/playwright-setup.sh /scripts/runtime-setup.sh
 COPY --chown=runner:runner --chmod=755 entrypoint.sh /app/entrypoint.sh
-
-RUN chmod -R 755 /scripts
+COPY --chown=runner:runner --chmod=755 detect-missed-tests.sh /app/detect-missed-tests.sh
 
 USER 1007
 
