@@ -62,6 +62,8 @@ _detect_missed_tests() {
     'BEGIN { if (t > 0) printf "%.2f", p * 100 / t; else print "0.00" }')
   pass_rate_rounded=$(awk -v p="$passed_count" -v t="$expected_count" \
     'BEGIN { if (t > 0) printf "%.0f", p * 100 / t; else print "0" }')
+  failure_rate=$(awk -v f="$failed_count" -v t="$expected_count" \
+    'BEGIN { if (t > 0) printf "%.2f", f * 100 / t; else print "0.00" }')
 
   export TEST_PASS_RATE="$pass_rate"
   export TEST_PASS_RATE_ROUNDED="$pass_rate_rounded"
@@ -75,8 +77,8 @@ _detect_missed_tests() {
   echo "TEST_TOTAL_COUNT=$TEST_TOTAL_COUNT"
   echo "TEST_PASSED_COUNT=$TEST_PASSED_COUNT"
   echo "TEST_FAILED_COUNT=$TEST_FAILED_COUNT"
-  echo "TEST_SKIPPED_COUNT=$TEST_SKIPPED_COUNT"
   echo "TEST_OVERALL_STATUS=$TEST_OVERALL_STATUS"
+  echo "failure_rate=$failure_rate"
 
   # ── 4. Patch JSON_FILE in-place ─────────────────────────────────────────────
   if [ -n "${JSON_FILE:-}" ] && [ -f "$JSON_FILE" ] && command -v jq > /dev/null 2>&1; then
@@ -90,7 +92,7 @@ _detect_missed_tests() {
     --argjson passRateR    "$pass_rate_rounded" \
     --argjson passedCount  "$passed_count" \
     --argjson failedCount  "$failed_count" \
-    --argjson skippedCount "$skipped_count" \
+    --argjson failureRate   "$failure_rate" \
     '
       .test_results.overall_status   = $status        |
       .test_results.pass_rate        = $passRate       |
@@ -98,7 +100,7 @@ _detect_missed_tests() {
       .test_results.total_count      = $expected       |
       .test_results.passed_count     = $passedCount    |
       .test_results.failed_count     = $failedCount    |
-      .test_results.skipped_count    = $skippedCount   |
+      .test_results.failure_rate     = $failureRate    |
       .test_results.missed_count     = $missed         |
       .test_results.expected_count   = $expected       |
       .environment_variables.TEST_OVERALL_STATUS    = $status                    |
@@ -107,7 +109,7 @@ _detect_missed_tests() {
       .environment_variables.TEST_TOTAL_COUNT       = ($expected | tostring)     |
       .environment_variables.TEST_PASSED_COUNT      = ($passedCount | tostring)  |
       .environment_variables.TEST_FAILED_COUNT      = ($failedCount | tostring)  |
-      .environment_variables.TEST_SKIPPED_COUNT     = ($skippedCount | tostring)
+      .environment_variables.TEST_FAILURE_RATE      = ($failureRate | tostring)
     ' \
     "$JSON_FILE" > "$tmp_json" 2>/dev/null; then
       mv "$tmp_json" "$JSON_FILE"
