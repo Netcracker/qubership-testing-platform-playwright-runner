@@ -77,6 +77,7 @@ _detect_missed_tests() {
   echo "TEST_TOTAL_COUNT=$TEST_TOTAL_COUNT"
   echo "TEST_PASSED_COUNT=$TEST_PASSED_COUNT"
   echo "TEST_FAILED_COUNT=$TEST_FAILED_COUNT"
+  echo "TEST_SKIPPED_COUNT=${TEST_SKIPPED_COUNT:-0}"
   echo "TEST_OVERALL_STATUS=$TEST_OVERALL_STATUS"
   echo "failure_rate=$failure_rate"
 
