@@ -123,6 +123,186 @@ _detect_missed_tests() {
   else
     echo "ℹ️  [detect-missed-tests] JSON_FILE not set or jq unavailable — skipping JSON patch."
   fi
+
+  # ── 5. Write broken Allure stubs for every missed test ───────────────────────
+  _write_missed_test_stubs "$results_dir" "$expected_count" "$actual_count" "$missed"
+}
+
+# ---------------------------------------------------------------------------
+# _write_missed_test_stubs
+#
+# Writes N broken *-result.json files into allure-results/ — one per missed
+# test — so the Allure report lists the missing tests explicitly.
+#
+# Real test names are resolved from $TMP_DIR/playwright-test-list.json (written
+# by capture-test-list.sh).  When that file is absent or unusable, placeholder
+# names "Missed test #N" are used instead.
+#
+# Args:
+#   $1  results_dir     — path to allure-results/
+#   $2  expected_count  — total tests Playwright intended to run
+#   $3  actual_count    — number of *-result.json files found
+#   $4  missed          — expected_count - actual_count
+# ---------------------------------------------------------------------------
+_write_missed_test_stubs() {
+  local results_dir="$1"
+  local expected_count="$2"
+  local actual_count="$3"
+  local missed="$4"
+  local list_file="${TMP_DIR:-/tmp}/playwright-test-list.json"
+  local ts
+  ts=$(date +%s)
+  local ts_ms="${ts}000"
+  local status_msg="Test did not produce an Allure result file. Expected: ${expected_count}, actual: ${actual_count}, missed: ${missed}. Process was likely OOM-killed or aborted."
+
+  # ── Try real-name resolution via playwright-test-list.json ──────────────────
+  if command -v jq > /dev/null 2>&1 && [ -f "$list_file" ] && jq empty "$list_file" 2>/dev/null; then
+
+    # Collect fullNames that already exist in allure-results
+    local existing_full_names
+    existing_full_names=$(jq -rs '[.[].fullName // empty] | sort | unique | .[]' \
+      "$results_dir"/*-result.json 2>/dev/null || true)
+
+    # Extract every spec entry from the list JSON.
+    # Playwright --list --reporter=json structure:
+    #   suites[]           ← project  (.title = "chromium")
+    #     suites[]         ← file     (.file = "kill-test.spec.ts", .title = filename)
+    #       specs[]        ← test/describe  (.title, .line, .column)
+    #
+    # fullName = file:line:column  (matches Allure's fullName format)
+    # Each TSV line: fullName<TAB>testName<TAB>parentSuite<TAB>subSuite<TAB>suite
+    local all_tests_tsv
+    all_tests_tsv=$(jq -r '
+      .suites[]? as $project |
+      $project.suites[]? as $fileSuite |
+      ($fileSuite.file // $fileSuite.title // "") as $file |
+      $fileSuite.specs[]? |
+      [
+        ($file + ":" + (.line|tostring) + ":" + (.column|tostring)),
+        (.title // "Unknown test"),
+        ($project.title // "Unknown project"),
+        ($fileSuite.title // $file)
+      ] | @tsv
+    ' "$list_file" 2>/dev/null || true)
+
+    if [ -n "$all_tests_tsv" ]; then
+      # Filter out tests that already have a result file, keep only missed ones
+      local stub_index=0
+      local written=0
+      while IFS=$'\t' read -r full_name test_name parent_suite suite_name; do
+        [ -z "$full_name" ] && continue
+
+        # Skip if this test already produced a result
+        if echo "$existing_full_names" | grep -qxF "$full_name" 2>/dev/null; then
+          continue
+        fi
+
+        stub_index=$(( stub_index + 1 ))
+        [ "$stub_index" -gt "$missed" ] && break
+
+        local uuid
+        uuid=$(cat /proc/sys/kernel/random/uuid 2>/dev/null || \
+               od -x /dev/urandom | head -1 | awk '{print $2$3"-"$4"-"$5"-"$6"-"$7$8$9}')
+
+        cat > "${results_dir}/${uuid}-result.json" <<EOF
+{
+  "uuid": "${uuid}",
+  "name": "${test_name}",
+  "fullName": "${full_name}",
+  "status": "broken",
+  "stage": "finished",
+  "labels": [
+    {"name": "language",    "value": "javascript"},
+    {"name": "framework",   "value": "playwright"},
+    {"name": "parentSuite", "value": "${parent_suite}"},
+    {"name": "suite",       "value": "${suite_name}"}
+  ],
+  "statusDetails": {
+    "message": "${status_msg}",
+    "trace": ""
+  },
+  "start": ${ts_ms},
+  "stop":  ${ts_ms},
+  "steps": [],
+  "attachments": [],
+  "parameters": [],
+  "links": []
+}
+EOF
+        written=$(( written + 1 ))
+        echo "✅ [detect-missed-tests] Wrote broken stub: ${full_name} → ${uuid}-result.json"
+      done <<< "$all_tests_tsv"
+
+      # If we resolved fewer stubs than missed (e.g. list was incomplete), fill with placeholders
+      local remaining=$(( missed - written ))
+      if [ "$remaining" -gt 0 ]; then
+        echo "ℹ️  [detect-missed-tests] $remaining stub(s) could not be resolved by name — using placeholders."
+        _write_placeholder_stubs "$results_dir" "$remaining" "$(( written + 1 ))" "$ts_ms" "$status_msg"
+      fi
+
+      echo "✅ [detect-missed-tests] Wrote $written named broken stub(s) into $results_dir"
+      return 0
+    fi
+  fi
+
+  # ── Fallback: placeholder stubs ──────────────────────────────────────────────
+  echo "ℹ️  [detect-missed-tests] playwright-test-list.json unavailable — writing $missed placeholder stub(s)."
+  _write_placeholder_stubs "$results_dir" "$missed" 1 "$ts_ms" "$status_msg"
+}
+
+# ---------------------------------------------------------------------------
+# _write_placeholder_stubs
+#
+# Writes N placeholder broken stubs named "Missed test #start_index" …
+#
+# Args:
+#   $1  results_dir   — path to allure-results/
+#   $2  count         — number of stubs to write
+#   $3  start_index   — first stub number (for label continuity when called after named stubs)
+#   $4  ts_ms         — epoch-milliseconds timestamp
+#   $5  status_msg    — statusDetails.message
+# ---------------------------------------------------------------------------
+_write_placeholder_stubs() {
+  local results_dir="$1"
+  local count="$2"
+  local start_index="$3"
+  local ts_ms="$4"
+  local status_msg="$5"
+
+  local i
+  for (( i = 0; i < count; i++ )); do
+    local idx=$(( start_index + i ))
+    local uuid
+    uuid=$(cat /proc/sys/kernel/random/uuid 2>/dev/null || \
+           od -x /dev/urandom | head -1 | awk '{print $2$3"-"$4"-"$5"-"$6"-"$7$8$9}')
+
+    cat > "${results_dir}/${uuid}-result.json" <<EOF
+{
+  "uuid": "${uuid}",
+  "name": "Missed test #${idx}",
+  "fullName": "missed-test-${idx}",
+  "status": "broken",
+  "stage": "finished",
+  "labels": [
+    {"name": "language",    "value": "javascript"},
+    {"name": "framework",   "value": "playwright"},
+    {"name": "parentSuite", "value": "Missed Tests"},
+    {"name": "suite",       "value": "OOM / Aborted"}
+  ],
+  "statusDetails": {
+    "message": "${status_msg}",
+    "trace": ""
+  },
+  "start": ${ts_ms},
+  "stop":  ${ts_ms},
+  "steps": [],
+  "attachments": [],
+  "parameters": [],
+  "links": []
+}
+EOF
+    echo "✅ [detect-missed-tests] Wrote placeholder stub #${idx} → ${uuid}-result.json"
+  done
 }
 
 _detect_missed_tests
