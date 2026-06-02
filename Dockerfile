@@ -45,6 +45,7 @@ COPY --chown=runner:runner --chmod=755 scripts/ /scripts/
 COPY --chown=runner:runner scripts/runtimes/playwright-setup.sh /scripts/runtime-setup.sh
 COPY --chown=runner:runner --chmod=755 entrypoint.sh /app/entrypoint.sh
 COPY --chown=runner:runner --chmod=755 detect-missed-tests.sh /app/detect-missed-tests.sh
+COPY --chown=runner:runner --chmod=755 capture-test-list.sh /app/capture-test-list.sh
 
 USER 1007
 
