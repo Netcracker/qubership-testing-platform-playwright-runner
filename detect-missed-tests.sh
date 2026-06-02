@@ -55,8 +55,8 @@ _detect_missed_tests() {
   # ── 3. Force FAILED and export counts ───────────────────────────────────────
   echo "⚠️  [detect-missed-tests] $missed test(s) did not produce result files — forcing FAILED."
   local passed_count="${TEST_PASSED_COUNT:-0}"
-  local prev_failed="${TEST_FAILED_COUNT:-0}"
-  local failed_count=$(( missed + prev_failed ))
+  local failed_count="${TEST_FAILED_COUNT:-0}"
+  local skipped_count=$(("${TEST_SKIPPED_COUNT:-0}" + "$missed"))
 
   pass_rate=$(awk -v p="$passed_count" -v t="$expected_count" \
     'BEGIN { if (t > 0) printf "%.2f", p * 100 / t; else print "0.00" }')
@@ -70,6 +70,7 @@ _detect_missed_tests() {
   export TEST_TOTAL_COUNT="$expected_count"
   export TEST_PASSED_COUNT="$passed_count"
   export TEST_FAILED_COUNT="$failed_count"
+  export TEST_SKIPPED_COUNT="$skipped_count"
   export TEST_OVERALL_STATUS="FAILED"
 
   echo "TEST_PASS_RATE=$TEST_PASS_RATE"
@@ -77,7 +78,7 @@ _detect_missed_tests() {
   echo "TEST_TOTAL_COUNT=$TEST_TOTAL_COUNT"
   echo "TEST_PASSED_COUNT=$TEST_PASSED_COUNT"
   echo "TEST_FAILED_COUNT=$TEST_FAILED_COUNT"
-  echo "TEST_SKIPPED_COUNT=${TEST_SKIPPED_COUNT:-0}"
+  echo "TEST_SKIPPED_COUNT=$TEST_SKIPPED_COUNT"
   echo "TEST_OVERALL_STATUS=$TEST_OVERALL_STATUS"
   echo "failure_rate=$failure_rate"
 
@@ -87,12 +88,12 @@ _detect_missed_tests() {
     tmp_json=$(mktemp)
   if jq \
     --arg   status        "FAILED" \
-    --argjson missed       "$missed" \
     --argjson expected     "$expected_count" \
     --argjson passRate     "$pass_rate" \
     --argjson passRateR    "$pass_rate_rounded" \
     --argjson passedCount  "$passed_count" \
     --argjson failedCount  "$failed_count" \
+    --argjson skippedCount "$skipped_count" \
     --argjson failureRate   "$failure_rate" \
     '
       .test_results.overall_status   = $status        |
@@ -102,7 +103,7 @@ _detect_missed_tests() {
       .test_results.passed_count     = $passedCount    |
       .test_results.failed_count     = $failedCount    |
       .test_results.failure_rate     = $failureRate    |
-      .test_results.missed_count     = $missed         |
+      .test_results.skipped_count    = $skippedCount   |
       .test_results.expected_count   = $expected       |
       .environment_variables.TEST_OVERALL_STATUS    = $status                    |
       .environment_variables.TEST_PASS_RATE         = ($passRate | tostring)     |
