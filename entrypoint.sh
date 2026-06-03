@@ -5,6 +5,7 @@ echo "🔧 Starting test job entrypoint script..."
 echo "📁 Working directory: $(pwd)"
 echo "📅 Timestamp: $(date)"
 
+
 # Set default upload method
 export UPLOAD_METHOD="${UPLOAD_METHOD:-sync}"
 echo "📤 Upload method: $UPLOAD_METHOD"
