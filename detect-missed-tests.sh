@@ -56,13 +56,17 @@ _detect_missed_tests() {
   echo "⚠️  [detect-missed-tests] $missed test(s) did not produce result files — forcing FAILED."
   local passed_count="${TEST_PASSED_COUNT:-0}"
   local failed_count="${TEST_FAILED_COUNT:-0}"
-  local skipped_count=$(("${TEST_SKIPPED_COUNT:-0}" + "$missed"))
+  local user_skipped_count="${TEST_SKIPPED_COUNT:-0}"
+  local skipped_count=$(( user_skipped_count + missed ))
+  # Skipped-by-user tests are excluded from the denominator; missed (OOM/aborted)
+  # tests remain in it so they still penalise the pass rate.
+  local effective_total=$(( expected_count - user_skipped_count ))
 
-  pass_rate=$(awk -v p="$passed_count" -v t="$expected_count" \
+  pass_rate=$(awk -v p="$passed_count" -v t="$effective_total" \
     'BEGIN { if (t > 0) printf "%.2f", p * 100 / t; else print "0.00" }')
-  pass_rate_rounded=$(awk -v p="$passed_count" -v t="$expected_count" \
+  pass_rate_rounded=$(awk -v p="$passed_count" -v t="$effective_total" \
     'BEGIN { if (t > 0) printf "%.0f", p * 100 / t; else print "0" }')
-  failure_rate=$(awk -v f="$failed_count" -v t="$expected_count" \
+  failure_rate=$(awk -v f="$failed_count" -v t="$effective_total" \
     'BEGIN { if (t > 0) printf "%.2f", f * 100 / t; else print "0.00" }')
 
   export TEST_PASS_RATE="$pass_rate"
