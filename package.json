@@ -11,12 +11,13 @@
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
-    "bats": "^1.11.1",
     "@faker-js/faker": "9.7.0",
     "@playwright/test": "1.58.2",
     "@types/node": "22.14.1",
+    "allure-commandline": "^2.34.1",
     "allure-playwright": "3.6.0",
     "axios": "1.15.0",
+    "bats": "^1.11.1",
     "consul": "2.0.1",
     "csv-parse": "6.0.0",
     "daff": "1.4.2",
@@ -24,22 +25,22 @@
     "exceljs": "4.4.0",
     "js-yaml": "4.1.0",
     "jsondiffpatch": "^0.7.3",
-    "newman": "6.2.1",
-    "allure-commandline": "^2.34.1",
-    "jsonpath-plus": "10.3.0"
+    "jsonpath-plus": "10.3.0",
+    "newman": "6.2.1"
   },
   "dependencies": {
-    "@usebruno/cli": "2.10.0",
-    "winston": "3.10.0",
     "@types/node-fetch": "2.6.12",
     "@types/xlsx": "0.0.36",
+    "@usebruno/cli": "2.10.0",
     "https": "1.0.0",
+    "marked": "^18.0.5",
     "node-fetch": "3.3.2",
     "oracledb": "6.8.0",
     "pg": "8.11.3",
     "ssh2": "1.16.0",
     "undici": "7.13.0",
-    "xlsx": "0.18.5",
-    "uuid": "11.1.0"
+    "uuid": "11.1.0",
+    "winston": "3.10.0",
+    "xlsx": "0.18.5"
   }
 }
