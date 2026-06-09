@@ -56,21 +56,27 @@ _detect_missed_tests() {
   echo "⚠️  [detect-missed-tests] $missed test(s) did not produce result files — forcing FAILED."
   local passed_count="${TEST_PASSED_COUNT:-0}"
   local failed_count="${TEST_FAILED_COUNT:-0}"
-  local skipped_count=$(("${TEST_SKIPPED_COUNT:-0}" + "$missed"))
+  local user_skipped_count="${TEST_SKIPPED_COUNT:-0}"
+  # Missed (OOM/aborted) tests are counted as broken, not skipped.
+  local broken_count=$(( ${TEST_BROKEN_COUNT:-0} + missed ))
+  # Skipped-by-user tests are excluded from the denominator; broken/missed tests
+  # remain in it so they still penalise the pass rate.
+  local effective_total=$(( expected_count - user_skipped_count ))
 
-  pass_rate=$(awk -v p="$passed_count" -v t="$expected_count" \
+  pass_rate=$(awk -v p="$passed_count" -v t="$effective_total" \
     'BEGIN { if (t > 0) printf "%.2f", p * 100 / t; else print "0.00" }')
-  pass_rate_rounded=$(awk -v p="$passed_count" -v t="$expected_count" \
+  pass_rate_rounded=$(awk -v p="$passed_count" -v t="$effective_total" \
     'BEGIN { if (t > 0) printf "%.0f", p * 100 / t; else print "0" }')
-  failure_rate=$(awk -v f="$failed_count" -v t="$expected_count" \
-    'BEGIN { if (t > 0) printf "%.2f", f * 100 / t; else print "0.00" }')
+  failure_rate=$(awk -v f="$failed_count" -v b="$broken_count" -v t="$effective_total" \
+    'BEGIN { if (t > 0) printf "%.2f", (f + b) * 100 / t; else print "0.00" }')
 
   export TEST_PASS_RATE="$pass_rate"
   export TEST_PASS_RATE_ROUNDED="$pass_rate_rounded"
   export TEST_TOTAL_COUNT="$expected_count"
   export TEST_PASSED_COUNT="$passed_count"
   export TEST_FAILED_COUNT="$failed_count"
-  export TEST_SKIPPED_COUNT="$skipped_count"
+  export TEST_SKIPPED_COUNT="$user_skipped_count"
+  export TEST_BROKEN_COUNT="$broken_count"
   export TEST_OVERALL_STATUS="FAILED"
 
   echo "TEST_PASS_RATE=$TEST_PASS_RATE"
@@ -79,6 +85,7 @@ _detect_missed_tests() {
   echo "TEST_PASSED_COUNT=$TEST_PASSED_COUNT"
   echo "TEST_FAILED_COUNT=$TEST_FAILED_COUNT"
   echo "TEST_SKIPPED_COUNT=$TEST_SKIPPED_COUNT"
+  echo "TEST_BROKEN_COUNT=$TEST_BROKEN_COUNT"
   echo "TEST_OVERALL_STATUS=$TEST_OVERALL_STATUS"
   echo "failure_rate=$failure_rate"
 
@@ -93,7 +100,8 @@ _detect_missed_tests() {
     --argjson passRateR    "$pass_rate_rounded" \
     --argjson passedCount  "$passed_count" \
     --argjson failedCount  "$failed_count" \
-    --argjson skippedCount "$skipped_count" \
+    --argjson skippedCount "$user_skipped_count" \
+    --argjson brokenCount  "$broken_count" \
     --argjson failureRate   "$failure_rate" \
     '
       .test_results.overall_status   = $status        |
@@ -104,6 +112,7 @@ _detect_missed_tests() {
       .test_results.failed_count     = $failedCount    |
       .test_results.failure_rate     = $failureRate    |
       .test_results.skipped_count    = $skippedCount   |
+      .test_results.broken_count     = $brokenCount    |
       .test_results.expected_count   = $expected       |
       .environment_variables.TEST_OVERALL_STATUS    = $status                    |
       .environment_variables.TEST_PASS_RATE         = ($passRate | tostring)     |
@@ -111,6 +120,7 @@ _detect_missed_tests() {
       .environment_variables.TEST_TOTAL_COUNT       = ($expected | tostring)     |
       .environment_variables.TEST_PASSED_COUNT      = ($passedCount | tostring)  |
       .environment_variables.TEST_FAILED_COUNT      = ($failedCount | tostring)  |
+      .environment_variables.TEST_BROKEN_COUNT      = ($brokenCount | tostring)  |
       .environment_variables.TEST_FAILURE_RATE      = ($failureRate | tostring)
     ' \
     "$JSON_FILE" > "$tmp_json" 2>/dev/null; then
