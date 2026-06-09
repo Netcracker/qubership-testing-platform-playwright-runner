@@ -40,6 +40,8 @@
 | EXTRA_VARS                          | string  | no        | ``                                        | Extra Variables propagation from job. Example:`var1=value1,var2=value2,` or EXTRA_VARS=`var1=value1; var2=value2;.                                                                                                                                           |
 | podSecurityContext                  | object  | no        | `{ runAsUser: 1007, fsGroup: 1007 }`      | Kubernetes pod-level security context for the runner Job. Applied when `SECURITY_CONTEXT_ENABLED=true`. Sets UID/GID for pod processes and volume file ownership.                                                                                            |
 
+| TRIGGER_AUTHOR                      | string  | no        | `""`                                      | Optional technical parameter. Used to display the test run author in the report.                                                                                                                                                                             |
+
 
 ## Hardware / Resource Requirements (HWE)
 
