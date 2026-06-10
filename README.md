@@ -96,9 +96,20 @@ To debug a test using Playwright trace:
 4. Inspect the test execution. The trace viewer will open in your browser, allowing you to: replay test steps, view console logs & network requests, inspect DOM snapshots at each action.
 
 ## Metrics (VictoriaMetrics)
+
 ### Summary
 
-Variables `ATP_METRICS_ENABLED=true`, `ATP_METRICS_URL` must be set. The script pushes the same payload to each configured target; it returns `1` if no target is configured or if every configured push fails.
+Set `ATP_METRICS_ENABLED=true` to enable metrics push; other parameters from the table are injected into the Job only in this case. When disabled, only `ATP_METRICS_ENABLED` is set and push is skipped (exit 0). Exit code `1` if metrics are enabled but no target is configured or every push fails.
+
+| Parameter             | Type    | Default value   | Description                                                                                                                                                             |
+|-----------------------|---------|-----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ATP_METRICS_ENABLED   | boolean | `false`         | Enables metrics push to VictoriaMetrics / vmagent. When `false`, metrics scripts skip push (exit 0).                                          |
+| ATP_METRICS_URL       | string  | `""`            | Base URL for VictoriaMetrics / vmagent.                                                                                              |
+| ATP_METRICS_TYPE      | string  | `pushgateway`   | Push mode: `pushgateway` (default) or `vm-native` (POST to `/api/v1/import/prometheus` with `extra_label` query params).                                              |
+| ATP_METRICS_AUTH_TYPE | string  | `none`          | Authentication type: `none` (default), `basic`, or `bearer`.                                                                                                            |
+| ATP_METRICS_USER      | string  | `""`            | Login for metrics service when `ATP_METRICS_AUTH_TYPE=basic`.                                                                                                           |
+| ATP_METRICS_PASS      | string  | `""`            | Password for metrics service when `ATP_METRICS_AUTH_TYPE=basic`.                                                                                                        |
+| ATP_METRICS_TOKEN     | string  | `""`            | Bearer token when `ATP_METRICS_AUTH_TYPE=bearer`.                                                                                                                       |
 
 **URL shapes**
 
