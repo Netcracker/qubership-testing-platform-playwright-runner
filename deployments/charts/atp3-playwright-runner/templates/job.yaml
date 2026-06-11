@@ -155,11 +155,6 @@ spec:
               secretKeyRef:
                 name: {{ include "atp3-playwright-runner.fullname" . }}-secret
                 key: atpMetricsToken
-          - name: ATP_RUNNER_VALUES
-            valueFrom:
-              secretKeyRef:
-                name: {{ include "atp3-playwright-runner.fullname" . }}-secret
-                key: runnerValues
         envFrom:
           - configMapRef:
               name: {{ include "atp3-playwright-runner.fullname" . }}-cm
