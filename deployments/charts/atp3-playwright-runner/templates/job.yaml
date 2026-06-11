@@ -127,7 +127,6 @@ spec:
               secretKeyRef:
                 name: {{ include "atp3-playwright-runner.fullname" . }}-secret
                 key: consulAdminToken
-          {{- if .Values.ATP_METRICS_ENABLED }}
           - name: ARGOCD_USER
             valueFrom:
               secretKeyRef:
@@ -143,6 +142,7 @@ spec:
               secretKeyRef:
                 name: {{ include "atp3-playwright-runner.fullname" . }}-secret
                 key: k8sToken
+          {{- if .Values.ATP_METRICS_ENABLED }}
           - name: ATP_METRICS_USER
             valueFrom:
               secretKeyRef:
