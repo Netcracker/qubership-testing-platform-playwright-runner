@@ -33,6 +33,7 @@ DEBUG_MODE: false
 SECURITY_CONTEXT_ENABLED: false
 EXTRA_VARS: ""
 TRIGGER_AUTHOR: ""
+ATP_APPLICATION_VERSION: ""
 podSecurityContext:
   runAsUser: 1007
   fsGroup: 1007
