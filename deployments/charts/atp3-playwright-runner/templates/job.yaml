@@ -69,12 +69,14 @@ spec:
             value: "{{ .Values.ATP_MONITORING_ENABLED }}"
           - name: ATP_METRICS_ENABLED
             value: "{{ .Values.ATP_METRICS_ENABLED }}"
+          {{- if .Values.ATP_METRICS_ENABLED }}
           - name: ATP_METRICS_URL
             value: "{{ .Values.ATP_METRICS_URL }}"
           - name: ATP_METRICS_TYPE
             value: "{{ .Values.ATP_METRICS_TYPE }}"
           - name: ATP_METRICS_AUTH_TYPE
             value: "{{ .Values.ATP_METRICS_AUTH_TYPE }}"
+          {{- end }}
           - name: DEBUG_MODE
             value: "{{ .Values.DEBUG_MODE }}"
           - name: PLAYWRIGHT_TRACE_MODE
@@ -140,6 +142,7 @@ spec:
               secretKeyRef:
                 name: {{ include "atp3-playwright-runner.fullname" . }}-secret
                 key: k8sToken
+          {{- if .Values.ATP_METRICS_ENABLED }}
           - name: ATP_METRICS_USER
             valueFrom:
               secretKeyRef:
@@ -155,6 +158,7 @@ spec:
               secretKeyRef:
                 name: {{ include "atp3-playwright-runner.fullname" . }}-secret
                 key: atpMetricsToken
+          {{- end }}
         envFrom:
           - configMapRef:
               name: {{ include "atp3-playwright-runner.fullname" . }}-cm
