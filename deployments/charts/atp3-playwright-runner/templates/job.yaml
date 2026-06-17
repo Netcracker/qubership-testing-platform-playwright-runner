@@ -87,10 +87,8 @@ spec:
             value: "{{ .Values.EXTRA_VARS }}"
           - name: TRIGGER_AUTHOR
             value: "{{ .Values.TRIGGER_AUTHOR }}"
-          - name: ARTIFACT_DESCRIPTOR_VERSION
-            value: "{{ .Values.ARTIFACT_DESCRIPTOR_VERSION }}"
-          - name: APPLICATION_NAME
-            value: "{{ .Values.APPLICATION_NAME }}"
+          - name: ATP_APPLICATION_VERSION
+            value: "{{ .Values.APPLICATION_NAME }}:{{ .Values.ARTIFACT_DESCRIPTOR_VERSION }}"
           - name: ATP_ENVGENE_CONFIGURATION
             valueFrom:
               secretKeyRef:
