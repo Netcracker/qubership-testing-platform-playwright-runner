@@ -91,8 +91,6 @@ spec:
             value: "{{ .Values.ARTIFACT_DESCRIPTOR_VERSION }}"
           - name: APPLICATION_NAME
             value: "{{ .Values.APPLICATION_NAME }}"
-          - name: VARIABLES
-            value: '{{ .Values | toJson }}'
           - name: ATP_ENVGENE_CONFIGURATION
             valueFrom:
               secretKeyRef:
