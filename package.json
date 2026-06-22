@@ -32,6 +32,7 @@
     "@types/node-fetch": "2.6.12",
     "@types/xlsx": "0.0.36",
     "@usebruno/cli": "2.10.0",
+    "docx": "^9.7.1",
     "https": "1.0.0",
     "marked": "^18.0.5",
     "node-fetch": "3.3.2",
