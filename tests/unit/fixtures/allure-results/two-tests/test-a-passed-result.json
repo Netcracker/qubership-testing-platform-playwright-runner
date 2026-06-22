@@ -1,0 +1,16 @@
+{
+  "uuid": "44444444-4444-4444-4444-444444444444",
+  "name": "test A",
+  "historyId": "hist-a:project1",
+  "testCaseId": "case-a",
+  "fullName": "suite.spec.ts:1:5",
+  "status": "passed",
+  "stage": "finished",
+  "start": 1000,
+  "stop": 2000,
+  "labels": [],
+  "steps": [],
+  "attachments": [],
+  "parameters": [],
+  "links": []
+}

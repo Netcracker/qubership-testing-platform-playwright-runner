@@ -1,0 +1,16 @@
+{
+  "uuid": "11111111-1111-1111-1111-111111111111",
+  "name": "flaky test @retry",
+  "historyId": "abc123:project1",
+  "testCaseId": "abc123",
+  "fullName": "retry.spec.ts:10:5",
+  "status": "failed",
+  "stage": "finished",
+  "start": 1000,
+  "stop": 2000,
+  "labels": [],
+  "steps": [],
+  "attachments": [],
+  "parameters": [],
+  "links": []
+}

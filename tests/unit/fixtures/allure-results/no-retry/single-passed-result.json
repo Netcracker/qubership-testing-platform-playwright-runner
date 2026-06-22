@@ -1,0 +1,16 @@
+{
+  "uuid": "33333333-3333-3333-3333-333333333333",
+  "name": "stable test @smoke",
+  "historyId": "def456:project1",
+  "testCaseId": "def456",
+  "fullName": "smoke.spec.ts:5:5",
+  "status": "passed",
+  "stage": "finished",
+  "start": 1000,
+  "stop": 2000,
+  "labels": [],
+  "steps": [],
+  "attachments": [],
+  "parameters": [],
+  "links": []
+}
