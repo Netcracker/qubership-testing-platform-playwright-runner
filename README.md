@@ -155,3 +155,34 @@ Per-test execution time from Allure `start`/`stop` timestamps — for performanc
 ```text
 atp_test_case_duration_seconds{test_name="Login smoke test", environment="prod", suite="Auth"} 3.412  
 ```
+
+---
+
+## Troubleshooting
+
+### Git clone Download timed out
+
+In case if you face such error:
+
+```text
+Downloading archive from: https://git.com/testing-repository/autotests-backend/-/archive/v1/autotests-backend-v1-release.zip
+ERROR: Download timed out (connect-timeout=30s, max-time=120s).
+   curl: curl: (28) Operation timed out after 120000 milliseconds with 48064134 bytes received
+```
+
+You can adjust these environment variables if you encounter timeout errors while cloning large repositories or with slow network connections:
+
+**ATP_TESTS_GIT_CLONE_CONNECT_TIMEOUT**  
+Sets the maximum time in seconds that `curl` will wait for a connection to establish when cloning the tests repository.  
+_Default: 30_
+
+**ATP_TESTS_GIT_CLONE_MAX_TIME**  
+Sets the overall maximum time in seconds that `curl` will spend downloading the repository archive before timing out.  
+_Default: 120_
+
+
+Set these variables inside EXTRA_VARS variable:
+
+```text
+EXTRA_VARS=ATP_TESTS_GIT_CLONE_CONNECT_TIMEOUT=60, ATP_TESTS_GIT_CLONE_MAX_TIME=300
+```
