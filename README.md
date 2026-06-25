@@ -180,7 +180,6 @@ _Default: 30_
 Sets the overall maximum time in seconds that `curl` will spend downloading the repository archive before timing out.  
 _Default: 120_
 
-
 Set these variables inside EXTRA_VARS variable:
 
 ```text
