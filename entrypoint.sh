@@ -59,10 +59,6 @@ load_envgene || fail "Load Envgen Failed"
 setup_runtime_environment     || fail "Runtime setup failed"
 start_upload_monitoring
 push_metrics_start || true
-if [ -f "/app/capture-test-list.sh" ]; then
-  # shellcheck disable=SC1091
-  source "/app/capture-test-list.sh" || true
-fi
 run_tests                     || fail "Test runner failed"
 
 echo "✅ Test job finished successfully!"

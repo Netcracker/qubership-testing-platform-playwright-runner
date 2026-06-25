@@ -30,7 +30,8 @@ _detect_missed_tests() {
 
   # Playwright emits: "Running 109 tests using 4 workers"
   local expected_count
-  expected_count=$(grep -oP 'Running \K[0-9]+(?= tests? using)' "$log_file" | tail -1)
+  expected_count=$(grep -oP 'Running \K[0-9]+(?= tests? using)' "$log_file" \
+    | awk '{s+=$1} END{if(NR>0) print s}')
 
   if [ -z "$expected_count" ]; then
     echo "ℹ️  [detect-missed-tests] No 'Running N tests' line in log — skipping."
@@ -135,6 +136,14 @@ _detect_missed_tests() {
   fi
 
   # ── 5. Write broken Allure stubs for every missed test ───────────────────────
+  # Lazily capture test list only when stubs are needed.
+  # Set SKIP_CAPTURE_TEST_LIST=true to skip and fall back to placeholder names.
+  if [ "${SKIP_CAPTURE_TEST_LIST:-false}" != "true" ] && [ -f "/app/capture-test-list.sh" ]; then
+    # shellcheck disable=SC1091
+    source "/app/capture-test-list.sh" || true
+  else
+    echo "ℹ️  [detect-missed-tests] SKIP_CAPTURE_TEST_LIST=true — using placeholder names for stubs."
+  fi
   _write_missed_test_stubs "$results_dir" "$expected_count" "$actual_count" "$missed"
 }
 

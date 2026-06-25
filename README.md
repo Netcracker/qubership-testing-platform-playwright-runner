@@ -1,4 +1,5 @@
 # Qubership Testing Platform Playwright Runner
+
 - [Deploy parameters](#deploy-parameters)
 - [Hardware / Resource Requirements (HWE)](#hardware--resource-requirements-hwe)
 - [Playwright Native Report (Trace Configuration)](#playwright-native-report-trace-configuration)
@@ -41,18 +42,26 @@
 | podSecurityContext                  | object  | no        | `{ runAsUser: 1007, fsGroup: 1007 }`      | Kubernetes pod-level security context for the runner Job. Applied when `SECURITY_CONTEXT_ENABLED=true`. Sets UID/GID for pod processes and volume file ownership.                                                                                            |
 | TRIGGER_AUTHOR                      | string  | no        | `""`                                      | Optional technical parameter. Used to display the test run author in the report.                                                                                                                                                                             |
 
+## EXTRA_VARS additional variables
+
+The variables below can be only passed via EXTRA_VARS deployment variable
+
+| Parameter                           | Type    | Mandatory | Default value | Description                                                              |
+|-------------------------------------|---------|-----------|---------------|--------------------------------------------------------------------------|
+| ATP_TESTS_GIT_CLONE_CONNECT_TIMEOUT | string  | no        | `"30"`        | Timeout on git clone connection                                          |
+| ATP_TESTS_GIT_CLONE_MAX_TIME        | string  | no        | `"120"`       | Timeout on git clone                                                     |
+| SKIP_CAPTURE_TEST_LIST              | boolean | no        | `"false"`     | Flag to forbid `playwright test --list` command (avoid double execution) |
 
 ## Hardware / Resource Requirements (HWE)
 
 Supported 2 profiles: `dev`, `prod`.
 
-| Parameter        | Dev    | Prod   |
-|------------------|--------|--------|
-| MEMORY_REQUEST   | 1000Mi | 2000Mi |
-| MEMORY_LIMIT     | 2000Mi | 3000Mi |
-| CPU_REQUEST      | 100m   | 100m   |
-| CPU_LIMIT        | 500m   | 1000m  |
-
+| Parameter      | Dev    | Prod   |
+|----------------|--------|--------|
+| MEMORY_REQUEST | 1000Mi | 2000Mi |
+| MEMORY_LIMIT   | 2000Mi | 3000Mi |
+| CPU_REQUEST    | 100m   | 100m   |
+| CPU_LIMIT      | 500m   | 1000m  |
 
 ## Playwright Native Report (Trace Configuration)
 
@@ -62,7 +71,7 @@ It defines when Playwright should record execution traces (`trace.zip`) for debu
 ### Possible Values
 
 | Value               | Description                                                                  |
-| ------------------- | ---------------------------------------------------------------------------- |
+|---------------------|------------------------------------------------------------------------------|
 | `on`                | Record traces for **all tests** (useful for local debugging).                |
 | `off`               | **Disable tracing** entirely (fastest test execution).                       |
 | `retain-on-failure` | Record traces **only for failed tests** — *recommended for CI environments*. |
@@ -93,54 +102,65 @@ To debug a test using Playwright trace:
 
 3. Open the trace locally: `npx playwright show-trace trace.zip` or `playwright show-trace trace.zip`.
 
-4. Inspect the test execution. The trace viewer will open in your browser, allowing you to: replay test steps, view console logs & network requests, inspect DOM snapshots at each action.
+4. Inspect the test execution. The trace viewer will open in your browser, allowing you to: replay test steps, view
+   console logs & network requests, inspect DOM snapshots at each action.
 
 ## Metrics (VictoriaMetrics)
 
 ### Summary
 
-Set `ATP_METRICS_ENABLED=true` to enable metrics push; other parameters from the table are injected into the Job only in this case. When disabled, only `ATP_METRICS_ENABLED` is set and push is skipped (exit 0). Exit code `1` if metrics are enabled but no target is configured or every push fails.
+Set `ATP_METRICS_ENABLED=true` to enable metrics push; other parameters from the table are injected into the Job only in
+this case. When disabled, only `ATP_METRICS_ENABLED` is set and push is skipped (exit 0). Exit code `1` if metrics are
+enabled but no target is configured or every push fails.
 
-| Parameter             | Type    | Default value   | Description                                                                                                                                                             |
-|-----------------------|---------|-----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| ATP_METRICS_ENABLED   | boolean | `false`         | Enables metrics push to VictoriaMetrics / vmagent. When `false`, metrics scripts skip push (exit 0).                                          |
-| ATP_METRICS_URL       | string  | `""`            | Base URL for VictoriaMetrics / vmagent.                                                                                              |
-| ATP_METRICS_TYPE      | string  | `pushgateway`   | Push mode: `pushgateway` (default) or `vm-native` (POST to `/api/v1/import/prometheus` with `extra_label` query params).                                              |
-| ATP_METRICS_AUTH_TYPE | string  | `none`          | Authentication type: `none` (default), `basic`, or `bearer`.                                                                                                            |
-| ATP_METRICS_USER      | string  | `""`            | Login for metrics service when `ATP_METRICS_AUTH_TYPE=basic`.                                                                                                           |
-| ATP_METRICS_PASS      | string  | `""`            | Password for metrics service when `ATP_METRICS_AUTH_TYPE=basic`.                                                                                                        |
-| ATP_METRICS_TOKEN     | string  | `""`            | Bearer token when `ATP_METRICS_AUTH_TYPE=bearer`.                                                                                                                       |
+| Parameter             | Type    | Default value | Description                                                                                                              |
+|-----------------------|---------|---------------|--------------------------------------------------------------------------------------------------------------------------|
+| ATP_METRICS_ENABLED   | boolean | `false`       | Enables metrics push to VictoriaMetrics / vmagent. When `false`, metrics scripts skip push (exit 0).                     |
+| ATP_METRICS_URL       | string  | `""`          | Base URL for VictoriaMetrics / vmagent.                                                                                  |
+| ATP_METRICS_TYPE      | string  | `pushgateway` | Push mode: `pushgateway` (default) or `vm-native` (POST to `/api/v1/import/prometheus` with `extra_label` query params). |
+| ATP_METRICS_AUTH_TYPE | string  | `none`        | Authentication type: `none` (default), `basic`, or `bearer`.                                                             |
+| ATP_METRICS_USER      | string  | `""`          | Login for metrics service when `ATP_METRICS_AUTH_TYPE=basic`.                                                            |
+| ATP_METRICS_PASS      | string  | `""`          | Password for metrics service when `ATP_METRICS_AUTH_TYPE=basic`.                                                         |
+| ATP_METRICS_TOKEN     | string  | `""`          | Bearer token when `ATP_METRICS_AUTH_TYPE=bearer`.                                                                        |
 
 **URL shapes**
 
 - **pushgateway** (Prometheus or VM): `{BASE}/metrics/job/atp_playwright_runner/instance/{ENV}/{DATE}/{TIME}`
-- **vm-native**: `{BASE}/api/v1/import/prometheus?extra_label=...` (run identity via `extra_label` for `job`, `instance`, `run_date`, `run_time`)
+- **vm-native**: `{BASE}/api/v1/import/prometheus?extra_label=...` (run identity via `extra_label` for `job`,
+  `instance`, `run_date`, `run_time`)
 
 ---
 
 ### Proposed Metrics
+
 #### `atp_test_case_result` (gauge, per test case)
+
 Binary result per individual test case — ideal for single-test failure alerts.
 
 ```text
 atp_test_case_result{test_name="Login smoke test", environment="prod", suite="Auth", status="failed"} 0
 atp_test_case_result{test_name="Create order",     environment="prod", suite="Orders", status="passed"} 1  
 ```
+
 * Value: `1` = passed, `0` = failed/skipped
-* Labels: `test_name`, `environment`, `suite` (Allure suite label, if present), `status` (passed/failed/skipped — lets you distinguish skipped from failed without extra metric)
+* Labels: `test_name`, `environment`, `suite` (Allure suite label, if present), `status` (passed/failed/skipped — lets
+  you distinguish skipped from failed without extra metric)
 * Alert example: `atp_test_case_result{environment="prod"} == 0`
 
 #### `atp_test_suite_pass_rate` (gauge, per run)
+
 Aggregated pass rate for the whole execution scope — for threshold-based alerts.
 
 ```text
 atp_test_suite_pass_rate{environment="prod", overall_status="PARTIAL"} 87.50  
 ```
+
 * Value: `0.0 – 100.0`
 * Labels: `environment`, `overall_status` (PASSED / PARTIAL / FAILED)
 * Alert example: `atp_test_suite_pass_rate{environment="prod"} < 80`
 
 #### `atp_test_suite_total` / `_passed` / `_failed` / `_skipped` (gauge)
+
 Count metrics per run — useful for dashboards and trend panels.
 
 ```text
@@ -149,7 +169,9 @@ atp_test_suite_passed{environment="prod"}  21
 atp_test_suite_failed{environment="prod"}   2
 atp_test_suite_skipped{environment="prod"}  1  
 ```
+
 #### `atp_test_case_duration_seconds` (gauge, optional)
+
 Per-test execution time from Allure `start`/`stop` timestamps — for performance regression alerts.
 
 ```text
@@ -170,10 +192,12 @@ ERROR: Download timed out (connect-timeout=30s, max-time=120s).
    curl: curl: (28) Operation timed out after 120000 milliseconds with 48064134 bytes received
 ```
 
-You can adjust these environment variables if you encounter timeout errors while cloning large repositories or with slow network connections:
+You can adjust these environment variables if you encounter timeout errors while cloning large repositories or with slow
+network connections:
 
 **ATP_TESTS_GIT_CLONE_CONNECT_TIMEOUT**  
-Sets the maximum time in seconds that `curl` will wait for a connection to establish when cloning the tests repository.  
+Sets the maximum time in seconds that `curl` will wait for a connection to establish when cloning the tests
+repository.  
 _Default: 30_
 
 **ATP_TESTS_GIT_CLONE_MAX_TIME**  
@@ -185,3 +209,9 @@ Set these variables inside EXTRA_VARS variable:
 ```text
 EXTRA_VARS=ATP_TESTS_GIT_CLONE_CONNECT_TIMEOUT=60, ATP_TESTS_GIT_CLONE_MAX_TIME=300
 ```
+
+### Test case prerequisites executed twice
+
+The reason could be `playwright test --list` command which executed in our runner automatically in order 
+to calculate test cases.
+To Fix issue SKIP_CAPTURE_TEST_LIST=true inside EXTRA_VARS.
