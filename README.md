@@ -50,7 +50,6 @@ The variables below can be only passed via EXTRA_VARS deployment variable
 |-------------------------------------|---------|-----------|---------------|--------------------------------------------------------------------------|
 | ATP_TESTS_GIT_CLONE_CONNECT_TIMEOUT | string  | no        | `"30"`        | Timeout on git clone connection                                          |
 | ATP_TESTS_GIT_CLONE_MAX_TIME        | string  | no        | `"120"`       | Timeout on git clone                                                     |
-| SKIP_CAPTURE_TEST_LIST              | boolean | no        | `"false"`     | Flag to forbid `playwright test --list` command (avoid double execution) |
 
 ## Hardware / Resource Requirements (HWE)
 
@@ -209,9 +208,3 @@ Set these variables inside EXTRA_VARS variable:
 ```text
 EXTRA_VARS=ATP_TESTS_GIT_CLONE_CONNECT_TIMEOUT=60, ATP_TESTS_GIT_CLONE_MAX_TIME=300
 ```
-
-### Test case prerequisites executed twice
-
-The reason could be `playwright test --list` command which executed in our runner automatically in order 
-to calculate test cases.
-To Fix issue SKIP_CAPTURE_TEST_LIST=true inside EXTRA_VARS.
