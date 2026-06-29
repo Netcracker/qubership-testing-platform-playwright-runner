@@ -137,12 +137,10 @@ _detect_missed_tests() {
 
   # ── 5. Write broken Allure stubs for every missed test ───────────────────────
   # Lazily capture test list only when stubs are needed.
-  # Set SKIP_CAPTURE_TEST_LIST=true to skip and fall back to placeholder names.
-  if [ "${SKIP_CAPTURE_TEST_LIST:-false}" != "true" ] && [ -f "/app/capture-test-list.sh" ]; then
+  # Set to skip and fall back to placeholder names.
+  if [ -f "/app/capture-test-list.sh" ]; then
     # shellcheck disable=SC1091
     source "/app/capture-test-list.sh" || true
-  else
-    echo "ℹ️  [detect-missed-tests] SKIP_CAPTURE_TEST_LIST=true — using placeholder names for stubs."
   fi
   _write_missed_test_stubs "$results_dir" "$expected_count" "$actual_count" "$missed"
 }
