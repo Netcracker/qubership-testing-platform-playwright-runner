@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-# capture-test-list.sh — sourced by entrypoint.sh BEFORE run_tests(), while
-# TEST_PARAMS is still in the environment and node_modules are ready in $TMP_DIR.
+# capture-test-list.sh — sourced lazily by detect-missed-tests.sh when missed > 0,
+# while TEST_PARAMS is still in the environment and node_modules are ready in $TMP_DIR.
 #
 # Runs `npx playwright test --list --reporter=json` with the same filter used
 # by start_tests.sh, and saves the output to $TMP_DIR/playwright-test-list.json.
