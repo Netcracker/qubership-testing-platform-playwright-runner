@@ -32,7 +32,7 @@
     "@kubernetes/client-node": "^1.4.0",
     "@types/node-fetch": "2.6.12",
     "@types/xlsx": "0.0.36",
-    "@usebruno/cli": "2.10.0",
+    "@usebruno/cli": "3.2.1",
     "docx": "^9.7.1",
     "https": "1.0.0",
     "marked": "^18.0.5",
