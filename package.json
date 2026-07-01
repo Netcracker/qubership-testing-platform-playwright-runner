@@ -29,6 +29,7 @@
     "newman": "6.2.1"
   },
   "dependencies": {
+    "@kubernetes/client-node": "^1.4.0",
     "@types/node-fetch": "2.6.12",
     "@types/xlsx": "0.0.36",
     "@usebruno/cli": "2.10.0",
