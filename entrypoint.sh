@@ -29,6 +29,8 @@ source /scripts/email-notification/generate-email-notification-json.sh
 # shellcheck disable=SC1091
 source /scripts/native-report.sh
 # shellcheck disable=SC1091
+source /scripts/generate-bruno-global-env.sh
+# shellcheck disable=SC1091
 source /scripts/render-environment-configuration.sh
 # shellcheck disable=SC1091
 source /scripts/push-metrics.sh
@@ -49,13 +51,16 @@ NATIVE_REPORT_DIR="playwright-report"
 # Register it here after all scripts are sourced so every function it calls is available.
 trap 'finalize_once' EXIT
 
-init_environment              || fail "Environment initialization failed"
-parse_extra_vars              || fail "EXTRA_VARS parsing failed"
-clone_repository              || fail "Repository clone failed"
+init_environment                 || fail "Environment initialization failed"
+parse_extra_vars                 || fail "EXTRA_VARS parsing failed"
+clone_repository                 || fail "Repository clone failed"
 render_environment_configuration || fail "Render Environment Configuration Failed"
-setup_runtime_environment     || fail "Runtime setup failed"
+if [ -z "${BRUNO_GLOBAL_ENV}" ]; then
+  generate_bruno_global_env        || fail "Bruno global environment generation failed"
+fi
+setup_runtime_environment        || fail "Runtime setup failed"
 start_upload_monitoring
-push_metrics_start || true
-run_tests                     || fail "Test runner failed"
+push_metrics_start               || true
+run_tests                        || fail "Test runner failed"
 
 echo "✅ Test job finished successfully!"
