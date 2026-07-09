@@ -48,8 +48,8 @@ The variables below can be only passed via EXTRA_VARS deployment variable
 
 | Parameter                           | Type    | Mandatory | Default value | Description                                                              |
 |-------------------------------------|---------|-----------|---------------|--------------------------------------------------------------------------|
-| ATP_TESTS_GIT_CLONE_CONNECT_TIMEOUT | string  | no        | `"30"`        | Timeout on git clone connection                                          |
-| ATP_TESTS_GIT_CLONE_MAX_TIME        | string  | no        | `"120"`       | Timeout on git clone                                                     |
+| ATP_TESTS_GIT_CLONE_CONNECT_TIMEOUT | string  | no        | `"30"`        | Timeout on Git clone connection                                          |
+| ATP_TESTS_GIT_CLONE_MAX_TIME        | string  | no        | `"120"`       | Timeout on Git clone                                                     |
 | ATP_TESTS_PROJECT_ROOT              | string  | no        | `""`          | Relative path under the cloned repository to use as the test project root (e.g. `packages/e2e`). Unset = clone root. |
 
 Example for a monorepo subfolder:
@@ -204,11 +204,11 @@ network connections:
 **ATP_TESTS_GIT_CLONE_CONNECT_TIMEOUT**  
 Sets the maximum time in seconds that `curl` will wait for a connection to establish when cloning the tests
 repository.  
-_Default: 30_
+*Default: 30*
 
 **ATP_TESTS_GIT_CLONE_MAX_TIME**  
 Sets the overall maximum time in seconds that `curl` will spend downloading the repository archive before timing out.  
-_Default: 120_
+*Default: 120*
 
 Set these variables inside EXTRA_VARS variable:
 
