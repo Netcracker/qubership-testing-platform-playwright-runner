@@ -12,6 +12,7 @@
 
 _capture_test_list() {
   local tmp_dir="${TMP_DIR:-/tmp}"
+  local project_dir="${PROJECT_DIR:-$tmp_dir}"
   local out_file="$tmp_dir/playwright-test-list.json"
 
   # ── Guard: need TEST_PARAMS and jq ──────────────────────────────────────────
@@ -56,8 +57,8 @@ _capture_test_list() {
   fi
 
   # ── Run --list in the cloned repo ───────────────────────────────────────────
-  if [ ! -d "$tmp_dir" ]; then
-    echo "ℹ️  [capture-test-list] TMP_DIR '$tmp_dir' does not exist — skipping."
+  if [ ! -d "$project_dir" ]; then
+    echo "ℹ️  [capture-test-list] PROJECT_DIR '$project_dir' does not exist — skipping."
     return 0
   fi
 
@@ -67,7 +68,7 @@ _capture_test_list() {
   # eval is required to expand quoted filter_flags correctly.
   # Capture both stdout and stderr into list_output; --list exits non-zero even
   # on success when tests are filtered/skipped, so we cannot rely on exit code.
-  list_output=$(cd "$tmp_dir" && eval npx playwright test --list --reporter=json "$filter_flags" 2>&1)
+  list_output=$(cd "$project_dir" && eval npx playwright test --list --reporter=json "$filter_flags" 2>&1)
 
   if [ -z "$list_output" ]; then
     echo "⚠️  [capture-test-list] npx playwright test --list produced no output — skipping."

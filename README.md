@@ -50,6 +50,13 @@ The variables below can be only passed via EXTRA_VARS deployment variable
 |-------------------------------------|---------|-----------|---------------|--------------------------------------------------------------------------|
 | ATP_TESTS_GIT_CLONE_CONNECT_TIMEOUT | string  | no        | `"30"`        | Timeout on git clone connection                                          |
 | ATP_TESTS_GIT_CLONE_MAX_TIME        | string  | no        | `"120"`       | Timeout on git clone                                                     |
+| ATP_TESTS_PROJECT_ROOT              | string  | no        | `""`          | Relative path under the cloned repository to use as the test project root (e.g. `packages/e2e`). Unset = clone root. |
+
+Example for a monorepo subfolder:
+
+```bash
+EXTRA_VARS=ATP_TESTS_PROJECT_ROOT=packages/e2e
+```
 
 ## Hardware / Resource Requirements (HWE)
 
