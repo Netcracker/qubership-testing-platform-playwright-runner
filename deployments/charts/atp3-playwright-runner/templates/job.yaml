@@ -65,6 +65,8 @@ spec:
             value: "{{ .Values.ATP_STORAGE_BUCKET }}"
           - name: ENABLE_JIRA_INTEGRATION
             value: "{{ .Values.ENABLE_JIRA_INTEGRATION }}"
+          - name: EXPECTED_PASS_RATE
+            value: "{{ .Values.EXPECTED_PASS_RATE | default "80" }}"
           - name: ATP_MONITORING_ENABLED
             value: "{{ .Values.ATP_MONITORING_ENABLED }}"
           - name: ATP_METRICS_ENABLED
