@@ -27,6 +27,7 @@
 | ATP_RUNNER_JOB_TTL                  | integer | no        | `43200`                                   | Time-to-live for the test job in seconds.                                                                                                                                                                                                                    |
 | ATP_RUNNER_JOB_EXIT_STRATEGY        | integer | no        | `0`                                       | Delay in seconds before job termination (for debugging).                                                                                                                                                                                                     |
 | ENABLE_JIRA_INTEGRATION             | boolean | no        | `false`                                   | Enable Jira integration for tests.                                                                                                                                                                                                                           |
+| EXPECTED_PASS_RATE                  | string  | no        | `80`                                      | If Pass Rate >= EXPECTED_PASS_RATE < 100 then result status is PARTIAL                                                                                                                                                                                       |
 | DEBUG_MODE                          | boolean | no        | `false`                                   | Enable additional debug behavior and logs in runner scripts.                                                                                                                                                                                                 |
 | PLAYWRIGHT_TRACE_MODE               | string  | no        | `retain-on-failure`                       | Defines when Playwright should record execution traces (trace.zip) for debugging. Supported values: `on`, `off`, `retain-on-failure`, `on-first-retry`. See [Playwright Native Report (Trace Configuration)](#playwright-native-report-trace-configuration). |
 | ATP_MONITORING_ENABLED              | boolean | no        | `false`                                   | Enable creation monitoring objects for runners.                                                                                                                                                                                                              |
@@ -256,11 +257,11 @@ network connections:
 **ATP_TESTS_GIT_CLONE_CONNECT_TIMEOUT**  
 Sets the maximum time in seconds that `curl` will wait for a connection to establish when cloning the tests
 repository.  
-*Default: 30*
+_Default: 30_
 
 **ATP_TESTS_GIT_CLONE_MAX_TIME**  
 Sets the overall maximum time in seconds that `curl` will spend downloading the repository archive before timing out.  
-*Default: 120*
+_Default: 120_
 
 Set these variables inside EXTRA_VARS variable:
 
