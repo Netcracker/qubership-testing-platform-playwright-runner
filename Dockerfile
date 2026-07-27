@@ -12,6 +12,7 @@ RUN rm -f /etc/apt/sources.list.d/* && \
 RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
     curl \
     unzip \
+    git \
     nano \
     bash \
     file \
