@@ -49,16 +49,7 @@ The variables below can be only passed via EXTRA_VARS deployment variable
 
 | Parameter                           | Type    | Mandatory | Default value | Description                                                              |
 |-------------------------------------|---------|-----------|---------------|--------------------------------------------------------------------------|
-| ATP_TESTS_GIT_CLONE_CONNECT_TIMEOUT | string  | no        | `"30"`        | Timeout on Git clone connection                                          |
-| ATP_TESTS_GIT_CLONE_MAX_TIME        | string  | no        | `"120"`       | Timeout on Git clone                                                     |
-| ATP_TESTS_PROJECT_ROOT              | string  | no        | `""`          | Relative path under the cloned repository to use as the test project root (e.g. `packages/e2e`). Unset = auto-detect (`app`/`tests`/`collections`/`postman_collection` at clone root, else `TestGeneration/`). |
 | ATP_TESTS_IGNORE_STRUCTURE          | string  | no        | `""`          | When `true`, skip the error if no standard repo markers (`app`/`tests`/`collections`/`postman_collection`) are found. |
-
-Example for a monorepo subfolder:
-
-```bash
-EXTRA_VARS=ATP_TESTS_PROJECT_ROOT=packages/e2e
-```
 
 Example when the repo has a non-standard layout:
 
@@ -68,47 +59,31 @@ EXTRA_VARS=ATP_TESTS_IGNORE_STRUCTURE=true
 
 > **How is the root test project directory selected?**
 
-When the runner clones or downloads the test repository, it must determine which subdirectory to use as the project root. The logic is as follows:
+When the runner clones the test repository, it determines the project root from a hardcoded ordered allowlist in `scripts/git-clone.sh` (`PROJECT_ROOT_CANDIDATES`, currently `.` then `TestGeneration`). Nested relative paths may be added to that list later.
 
-1. **Explicit override (ATP_TESTS_PROJECT_ROOT):**  
-   If the variable `ATP_TESTS_PROJECT_ROOT` is set (via `EXTRA_VARS` or environment), its value (must be a *relative* path under the cloned repo, e.g. `packages/e2e`) is used as the project root **if** the directory exists and does not escape the repo root.  
-   - Invalid values (absolute paths, paths containing `..`, or missing directories) cause an error.
+For each candidate, in order:
 
-2. **Automatic detection:**  
-   If `ATP_TESTS_PROJECT_ROOT` is not set, the logic tries to auto-detect the root based on standard repo markers **at the top level of the cloned repo** in this order:
-   - If an `app/` directory exists, use the repo root.
-   - Else if a `tests/` directory exists, use the repo root.
-   - Else if a `collections/` directory exists, use the repo root.
-   - Else if there are any files matching `*postman_collection*`, use the repo root.
+1. Skip if the directory does not exist under the clone.
+2. Skip if it has no standard repo markers (`app/`, `tests/`, `collections/`, or `*postman_collection*` files).
+3. First candidate that exists **and** has markers becomes `PROJECT_DIR`.
 
-3. **TestGeneration fallback:**  
-   If none of the above markers are present, but a `TestGeneration/` directory exists at the root, use it as the project root (as if `ATP_TESTS_PROJECT_ROOT=TestGeneration`).
+If no candidate matches, the clone root is used. Structure validation then runs on `PROJECT_DIR`:
 
-4. **Final fallback:**  
-   If none of the above are found, the repo root is used as the project root.
+- If markers are missing and `ATP_TESTS_IGNORE_STRUCTURE=true`, validation is skipped (warning).
+- Otherwise missing markers cause the job to fail.
 
-5. **Structure validation:**  
-   - If the automatic detection finds no standard repo markers or `TestGeneration/`, and `ATP_TESTS_IGNORE_STRUCTURE=true` is set, structure validation is skipped and the root is used anyway.
-   - If `ATP_TESTS_IGNORE_STRUCTURE` is *not* set, and no markers/folder are found, an error is raised and the job fails.
-
-**Examples:**
-
-- To use a monorepo subfolder as root:  
-  `EXTRA_VARS=ATP_TESTS_PROJECT_ROOT=packages/e2e`
-- To skip structure validation (for unusual layouts):  
-  `EXTRA_VARS=ATP_TESTS_IGNORE_STRUCTURE=true`
+Malformed allowlist entries (absolute paths or paths containing `..`) are treated as a configuration bug and hard-fail.
 
 **Summary Table:**
 
-| Priority | Condition                                    | Outcome                          |
-|----------|----------------------------------------------|----------------------------------|
-| 1        | ATP_TESTS_PROJECT_ROOT set (relative path)   | Use specified directory          |
-| 2        | `app/`, `tests/`, `collections/` or `*postman_collection*` at root | Use repo root          |
-| 3        | `TestGeneration/` at root                    | Use `TestGeneration/` as root    |
-| 4        | None of the above and ATP_TESTS_IGNORE_STRUCTURE=true | Use repo root (with warning) |
-| 5        | None of the above and no ignore flag         | Error, job fails                 |
+| Priority | Condition                                                         | Outcome                       |
+|----------|-------------------------------------------------------------------|-------------------------------|
+| 1        | `.` (clone root) has repo markers                                 | Use repo root                 |
+| 2        | `TestGeneration/` exists and has repo markers                     | Use `TestGeneration/`         |
+| 3        | None matched; `ATP_TESTS_IGNORE_STRUCTURE=true`                   | Use repo root (with warning)  |
+| 4        | None matched; no ignore flag                                      | Error, job fails              |
 
-See the `scripts/git-clone.sh` for implementation details.
+See `scripts/git-clone.sh` for implementation details.
 
 
 ## Hardware / Resource Requirements (HWE)
@@ -235,36 +210,4 @@ Per-test execution time from Allure `start`/`stop` timestamps — for performanc
 
 ```text
 atp_test_case_duration_seconds{test_name="Login smoke test", environment="prod", suite="Auth"} 3.412  
-```
-
----
-
-## Troubleshooting
-
-### Git clone Download timed out
-
-In case if you face such error:
-
-```text
-Downloading archive from: https://git.com/testing-repository/autotests-backend/-/archive/v1/autotests-backend-v1-release.zip
-ERROR: Download timed out (connect-timeout=30s, max-time=120s).
-   curl: curl: (28) Operation timed out after 120000 milliseconds with 48064134 bytes received
-```
-
-You can adjust these environment variables if you encounter timeout errors while cloning large repositories or with slow
-network connections:
-
-**ATP_TESTS_GIT_CLONE_CONNECT_TIMEOUT**  
-Sets the maximum time in seconds that `curl` will wait for a connection to establish when cloning the tests
-repository.  
-_Default: 30_
-
-**ATP_TESTS_GIT_CLONE_MAX_TIME**  
-Sets the overall maximum time in seconds that `curl` will spend downloading the repository archive before timing out.  
-_Default: 120_
-
-Set these variables inside EXTRA_VARS variable:
-
-```text
-EXTRA_VARS=ATP_TESTS_GIT_CLONE_CONNECT_TIMEOUT=60, ATP_TESTS_GIT_CLONE_MAX_TIME=300
 ```
