@@ -51,11 +51,14 @@ trap 'finalize_once' EXIT
 
 init_environment              || fail "Environment initialization failed"
 parse_extra_vars              || fail "EXTRA_VARS parsing failed"
+validate_playwright_shard     || fail "PLAYWRIGHT_SHARD validation failed"
 clone_repository              || fail "Repository clone failed"
 render_environment_configuration || fail "Render Environment Configuration Failed"
 setup_runtime_environment     || fail "Runtime setup failed"
 start_upload_monitoring
-push_metrics_start || true
+if [ "${RUNNER_MODE:-full}" != "shard" ]; then
+  push_metrics_start || true
+fi
 run_tests                     || fail "Test runner failed"
 
 echo "✅ Test job finished successfully!"

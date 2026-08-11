@@ -56,6 +56,11 @@ _capture_test_list() {
     return 0
   fi
 
+  local shard_flags=""
+  if [ -n "${PLAYWRIGHT_SHARD:-}" ]; then
+    shard_flags="--shard=${PLAYWRIGHT_SHARD}"
+  fi
+
   # ── Run --list in the cloned repo ───────────────────────────────────────────
   if [ ! -d "$project_dir" ]; then
     echo "ℹ️  [capture-test-list] PROJECT_DIR '$project_dir' does not exist — skipping."
@@ -68,7 +73,7 @@ _capture_test_list() {
   # eval is required to expand quoted filter_flags correctly.
   # Capture both stdout and stderr into list_output; --list exits non-zero even
   # on success when tests are filtered/skipped, so we cannot rely on exit code.
-  list_output=$(cd "$project_dir" && eval npx playwright test --list --reporter=json "$filter_flags" 2>&1)
+  list_output=$(cd "$project_dir" && eval npx playwright test --list --reporter=json "$filter_flags" "$shard_flags" 2>&1)
 
   if [ -z "$list_output" ]; then
     echo "⚠️  [capture-test-list] npx playwright test --list produced no output — skipping."
@@ -92,6 +97,31 @@ _capture_test_list() {
   saved_count=$(echo "$json_output" | \
     jq '[.suites[]?.suites[]?.specs[]?] | length' 2>/dev/null || echo "?")
   echo "✅ [capture-test-list] Saved $saved_count spec entries to $out_file"
+
+  if [ -n "${PLAYWRIGHT_SHARD:-}" ]; then
+    local manifest_file="$tmp_dir/shard-manifest.json"
+    local source_commit
+    source_commit=$(cd "$project_dir" && git rev-parse HEAD 2>/dev/null || true)
+    jq -n \
+      --arg schemaVersion "1" \
+      --arg shard "$PLAYWRIGHT_SHARD" \
+      --arg sourceCommit "$source_commit" \
+      --arg testParams "$TEST_PARAMS" \
+      --slurpfile testList "$out_file" \
+      '{
+        schemaVersion: ($schemaVersion | tonumber),
+        shard: $shard,
+        sourceCommit: $sourceCommit,
+        testParams: ($testParams | fromjson),
+        expectedTests: [
+          $testList[0] | .. | objects
+          | select(has("title") and (has("file") or has("location")))
+          | {name: .title, file: (.file // .location.file // "")}
+        ],
+        testList: $testList[0]
+      }' > "$manifest_file"
+    echo "✅ [capture-test-list] Saved shard manifest to $manifest_file"
+  fi
 }
 
 _capture_test_list

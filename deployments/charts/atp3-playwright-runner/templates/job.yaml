@@ -83,6 +83,8 @@ spec:
             value: "{{ .Values.DEBUG_MODE }}"
           - name: PLAYWRIGHT_TRACE_MODE
             value: "{{ .Values.PLAYWRIGHT_TRACE_MODE }}"
+          - name: PLAYWRIGHT_SHARD
+            value: "{{ .Values.PLAYWRIGHT_SHARD }}"
           - name: TEST_PARAMS
             value: {{ toJson .Values.TEST_PARAMS | quote }}
           - name: EXTRA_VARS
