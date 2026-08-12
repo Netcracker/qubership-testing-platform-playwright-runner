@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright:v1.58.2-noble
+FROM mcr.microsoft.com/playwright:v1.62.1-noble
 
 ENV HOME_EX=/app
 ENV BRU_BIN="/app/node_modules/@usebruno/cli/bin"
