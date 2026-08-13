@@ -34,6 +34,15 @@ _run_calculate() {
     "
 }
 
+_run_file_details() {
+    bash -c "
+        ln -sfn '$TMP_DIR' /tmp/clone
+        source '$CALCULATE_SCRIPT' '$TMP_DIR/allure-results'
+        echo \"TEST_FILE_DETAILS_FILE=\$TEST_FILE_DETAILS_FILE\"
+        cat \"\$TEST_FILE_DETAILS_FILE\"
+    "
+}
+
 @test "retry-pass deduplicates by historyId and counts one passed test" {
     _copy_fixture retry-pass
     run _run_calculate
@@ -57,4 +66,17 @@ _run_calculate() {
     run _run_calculate
     [ "$status" -eq 0 ]
     echo "$output" | grep -q 'TEST_TOTAL_COUNT=2'
+}
+
+@test "file details group runnable spec paths by their effective status" {
+    _copy_fixture file-status
+    run _run_file_details
+    [ "$status" -eq 0 ]
+    echo "$output" | grep -q 'TEST_FILE_DETAILS_FILE='
+    echo "$output" | grep -q '^FAILED | e2e/checkout.spec.ts$'
+    echo "$output" | grep -q '^FAILED | e2e/profile.spec.ts$'
+    echo "$output" | grep -q '^PASSED | e2e/login.spec.ts$'
+    echo "$output" | grep -q '^PASSED | e2e/search.spec.ts$'
+    ! echo "$output" | grep -q 'Backend.Users.getProfile'
+    [ "$(echo "$output" | grep -Ec '^(PASSED|FAILED) \| ')" -eq 4 ]
 }
