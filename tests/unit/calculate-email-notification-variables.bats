@@ -80,3 +80,32 @@ _run_file_details() {
     ! echo "$output" | grep -q 'Backend.Users.getProfile'
     [ "$(echo "$output" | grep -Ec '^(PASSED|FAILED) \| ')" -eq 4 ]
 }
+
+@test "file details strip leading ../ so the path can be reused as test input" {
+    _copy_fixture relative-parent
+    run _run_file_details
+    [ "$status" -eq 0 ]
+    echo "$output" | grep -q '^PASSED | tests/TestScenario/foo.test.ts$'
+    ! echo "$output" | grep -q '\.\./'
+}
+
+@test "file details omit TagHelper wrapper paths that are not specs" {
+    _copy_fixture tag-helper-only
+    run _run_file_details
+    [ "$status" -eq 0 ]
+    ! echo "$output" | grep -q 'Engine/Shared/TagHelper.ts'
+    [ "$(echo "$output" | grep -Ec '^(PASSED|FAILED) \| ')" -eq 0 ]
+}
+
+@test "file details use Allure suite spec names instead of TagHelper wrapper" {
+    _copy_fixture tag-helper-wrapper
+    mkdir -p "$TMP_DIR/tests/TestScenario"
+    touch "$TMP_DIR/tests/TestScenario/simplePlaywrightEnvConfiguration.test.ts"
+    touch "$TMP_DIR/tests/TestScenario/simplePlaywrightBrowserLaunchSanity.test.ts"
+    run _run_file_details
+    [ "$status" -eq 0 ]
+    echo "$output" | grep -q '^PASSED | tests/TestScenario/simplePlaywrightBrowserLaunchSanity.test.ts$'
+    echo "$output" | grep -q '^PASSED | tests/TestScenario/simplePlaywrightEnvConfiguration.test.ts$'
+    ! echo "$output" | grep -q 'Engine/Shared/TagHelper.ts'
+    [ "$(echo "$output" | grep -Ec '^(PASSED|FAILED) \| ')" -eq 2 ]
+}
