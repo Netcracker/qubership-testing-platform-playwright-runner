@@ -1,0 +1,42 @@
+{
+  "suites": [
+    {
+      "title": "Frontend",
+      "suites": [
+        {
+          "title": "foo.test.ts",
+          "file": "e2e/foo.test.ts",
+          "specs": [],
+          "suites": [
+            {
+              "title": "AT-RI-0067 — Power Objects @smoke",
+              "specs": [
+                {
+                  "title": "already ran test",
+                  "line": 10,
+                  "column": 5
+                },
+                {
+                  "title": "missed nested test",
+                  "line": 20,
+                  "column": 7
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "bar.test.ts",
+          "file": "e2e/bar.test.ts",
+          "specs": [
+            {
+              "title": "another missed test",
+              "line": 5,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

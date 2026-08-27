@@ -146,6 +146,156 @@ _detect_missed_tests() {
 }
 
 # ---------------------------------------------------------------------------
+# _infer_majority_label
+#
+# Returns the most common value of labels[name=$2] among existing *-result.json.
+# Empty string when none found.
+# ---------------------------------------------------------------------------
+_infer_majority_label() {
+  local results_dir="$1"
+  local label_name="$2"
+  if ! compgen -G "${results_dir}/*-result.json" > /dev/null 2>&1; then
+    echo ""
+    return 0
+  fi
+  jq -rs --arg lbl "$label_name" '
+    [
+      .[] |
+      [(.labels // [])[] | select(.name == $lbl) | .value][0] // empty
+    ]
+    | map(select(. != null and . != ""))
+    | group_by(.)
+    | max_by(length)
+    | .[0] // empty
+  ' "$results_dir"/*-result.json 2>/dev/null || true
+}
+
+# ---------------------------------------------------------------------------
+# _infer_majority_project
+#
+# Returns the most common parentSuite (or parameters.Project) among existing
+# *-result.json files. Empty string when none found.
+# ---------------------------------------------------------------------------
+_infer_majority_project() {
+  local results_dir="$1"
+  local from_label
+  from_label=$(_infer_majority_label "$results_dir" "parentSuite")
+  if [ -n "$from_label" ]; then
+    echo "$from_label"
+    return 0
+  fi
+  if ! compgen -G "${results_dir}/*-result.json" > /dev/null 2>&1; then
+    echo ""
+    return 0
+  fi
+  jq -rs '
+    [
+      .[] |
+      [(.parameters // [])[] | select(.name == "Project") | .value][0] // empty
+    ]
+    | map(select(. != null and . != ""))
+    | group_by(.)
+    | max_by(length)
+    | .[0] // empty
+  ' "$results_dir"/*-result.json 2>/dev/null || true
+}
+
+# ---------------------------------------------------------------------------
+# _write_allure_stub
+#
+# Writes one broken Allure *-result.json via jq (safe escaping).
+#
+# Args:
+#   $1  results_dir
+#   $2  uuid
+#   $3  name
+#   $4  fullName
+#   $5  project      — parentSuite / Project parameter
+#   $6  suite        — file basename (or placeholder suite)
+#   $7  subSuite     — describe titles joined by " > " (may be empty)
+#   $8  ts_ms
+#   $9  status_msg
+# ---------------------------------------------------------------------------
+_write_allure_stub() {
+  local results_dir="$1"
+  local uuid="$2"
+  local name="$3"
+  local full_name="$4"
+  local project="$5"
+  local suite="$6"
+  local sub_suite="$7"
+  local ts_ms="$8"
+  local status_msg="$9"
+  local out_file="${results_dir}/${uuid}-result.json"
+
+  jq -n \
+    --arg uuid "$uuid" \
+    --arg name "$name" \
+    --arg fullName "$full_name" \
+    --arg project "$project" \
+    --arg suite "$suite" \
+    --arg subSuite "$sub_suite" \
+    --arg statusMsg "$status_msg" \
+    --argjson start "$ts_ms" \
+    --argjson stop "$ts_ms" \
+    '
+      # titlePath array: [file, ...describes] — no project, no leaf test name
+      ($subSuite | if . == "" then [] else split(" > ") end) as $describes |
+      (
+        if $suite == "" then $describes else ([$suite] + $describes) end
+      ) as $titlePathArr |
+      (
+        " > " + $project
+        + (if $suite == "" then "" else " > " + $suite end)
+        + (if $subSuite == "" then "" else " > " + $subSuite end)
+      ) as $titlePathLabel |
+      {
+        uuid: $uuid,
+        name: $name,
+        fullName: $fullName,
+        status: "broken",
+        stage: "finished",
+        labels: (
+          [
+            {"name": "language", "value": "javascript"},
+            {"name": "framework", "value": "playwright"},
+            {"name": "titlePath", "value": $titlePathLabel},
+            {"name": "parentSuite", "value": $project}
+          ]
+          + (if $suite == "" then [] else [
+              {"name": "package", "value": $suite},
+              {"name": "suite", "value": $suite}
+            ] end)
+          + (if $subSuite == "" then [] else [{"name": "subSuite", "value": $subSuite}] end)
+        ),
+        statusDetails: {
+          message: $statusMsg,
+          trace: ""
+        },
+        start: $start,
+        stop: $stop,
+        steps: [],
+        attachments: [],
+        parameters: (
+          if $project == "Missed Tests" then []
+          else [{"name": "Project", "value": $project}]
+          end
+        ),
+        links: [],
+        titlePath: $titlePathArr
+      }
+    ' > "$out_file"
+}
+
+# ---------------------------------------------------------------------------
+# _new_uuid
+# ---------------------------------------------------------------------------
+_new_uuid() {
+  cat /proc/sys/kernel/random/uuid 2>/dev/null || \
+    od -x /dev/urandom | head -1 | awk '{print $2$3"-"$4"-"$5"-"$6"-"$7$8$9}'
+}
+
+# ---------------------------------------------------------------------------
 # _write_missed_test_stubs
 #
 # Writes N broken *-result.json files into allure-results/ — one per missed
@@ -176,38 +326,64 @@ _write_missed_test_stubs() {
   if command -v jq > /dev/null 2>&1 && [ -f "$list_file" ] && jq empty "$list_file" 2>/dev/null; then
 
     # Collect fullNames that already exist in allure-results
-    local existing_full_names
-    existing_full_names=$(jq -rs '[.[].fullName // empty] | sort | unique | .[]' \
-      "$results_dir"/*-result.json 2>/dev/null || true)
+    local existing_full_names=""
+    if compgen -G "${results_dir}/*-result.json" > /dev/null 2>&1; then
+      existing_full_names=$(jq -rs '[.[].fullName // empty] | sort | unique | .[]' \
+        "$results_dir"/*-result.json 2>/dev/null || true)
+    fi
 
-    # Extract every spec entry from the list JSON.
+    # Extract every leaf spec from the list JSON (JSONL).
     # Playwright --list --reporter=json structure:
-    #   suites[]           ← project  (.title = "chromium")
-    #     suites[]         ← file     (.file = "kill-test.spec.ts", .title = filename)
-    #       specs[]        ← test/describe  (.title, .line, .column)
+    #   suites[]           ← project  (.title = "Frontend")
+    #     suites[]         ← file     (.file / .title)
+    #       suites[]       ← describe (nested)
+    #         specs[]      ← test     (.title, .line, .column)
     #
-    # fullName = file:line:column  (matches Allure's fullName format)
-    # Each TSV line: fullName<TAB>testName<TAB>parentSuite<TAB>subSuite<TAB>suite
-    local all_tests_tsv
-    all_tests_tsv=$(jq -r '
+    # fullName = basename:line:column  (matches Allure's fullName format)
+    # Each line: {"fullName","name","project","suite","subSuite"}
+    local all_tests_jsonl
+    all_tests_jsonl=$(jq -c '
+      def basename:
+        split("/") | last;
+      # Emit specs at this level, then recurse into nested describe suites.
+      # Do NOT bind specs with `as` before the comma — empty specs would
+      # short-circuit the recursive suites[] walk.
+      def walk_specs($project; $file; $describes):
+        (
+          (.specs // [])[] |
+          {
+            fullName: ($file + ":" + (.line|tostring) + ":" + (.column|tostring)),
+            name: (.title // "Unknown test"),
+            project: $project,
+            suite: $file,
+            subSuite: ($describes | join(" > "))
+          }
+        ),
+        (
+          (.suites // [])[] |
+          walk_specs($project; $file; ($describes + [(.title // "")]))
+        );
       .suites[]? as $project |
+      ($project.title // "Unknown project") as $projectTitle |
       $project.suites[]? as $fileSuite |
-      ($fileSuite.file // $fileSuite.title // "") as $file |
-      $fileSuite.specs[]? |
-      [
-        ($file + ":" + (.line|tostring) + ":" + (.column|tostring)),
-        (.title // "Unknown test"),
-        ($project.title // "Unknown project"),
-        ($fileSuite.title // $file)
-      ] | @tsv
+      (($fileSuite.file // $fileSuite.title // "") | basename) as $file |
+      $fileSuite | walk_specs($projectTitle; $file; [])
     ' "$list_file" 2>/dev/null || true)
 
-    if [ -n "$all_tests_tsv" ]; then
-      # Filter out tests that already have a result file, keep only missed ones
+    if [ -n "$all_tests_jsonl" ]; then
       local stub_index=0
       local written=0
-      while IFS=$'\t' read -r full_name test_name parent_suite suite_name; do
-        [ -z "$full_name" ] && continue
+      local line full_name test_name project suite_name sub_suite uuid
+      while IFS= read -r line; do
+        [ -z "$line" ] && continue
+
+        full_name=$(echo "$line" | jq -r '.fullName')
+        test_name=$(echo "$line" | jq -r '.name')
+        project=$(echo "$line" | jq -r '.project')
+        suite_name=$(echo "$line" | jq -r '.suite')
+        sub_suite=$(echo "$line" | jq -r '.subSuite // empty')
+
+        [ -z "$full_name" ] || [ "$full_name" = "null" ] && continue
 
         # Skip if this test already produced a result
         if echo "$existing_full_names" | grep -qxF "$full_name" 2>/dev/null; then
@@ -217,38 +393,12 @@ _write_missed_test_stubs() {
         stub_index=$(( stub_index + 1 ))
         [ "$stub_index" -gt "$missed" ] && break
 
-        local uuid
-        uuid=$(cat /proc/sys/kernel/random/uuid 2>/dev/null || \
-               od -x /dev/urandom | head -1 | awk '{print $2$3"-"$4"-"$5"-"$6"-"$7$8$9}')
-
-        cat > "${results_dir}/${uuid}-result.json" <<EOF
-{
-  "uuid": "${uuid}",
-  "name": "${test_name}",
-  "fullName": "${full_name}",
-  "status": "broken",
-  "stage": "finished",
-  "labels": [
-    {"name": "language",    "value": "javascript"},
-    {"name": "framework",   "value": "playwright"},
-    {"name": "parentSuite", "value": "${parent_suite}"},
-    {"name": "suite",       "value": "${suite_name}"}
-  ],
-  "statusDetails": {
-    "message": "${status_msg}",
-    "trace": ""
-  },
-  "start": ${ts_ms},
-  "stop":  ${ts_ms},
-  "steps": [],
-  "attachments": [],
-  "parameters": [],
-  "links": []
-}
-EOF
+        uuid=$(_new_uuid)
+        _write_allure_stub "$results_dir" "$uuid" "$test_name" "$full_name" \
+          "$project" "$suite_name" "$sub_suite" "$ts_ms" "$status_msg"
         written=$(( written + 1 ))
         echo "✅ [detect-missed-tests] Wrote broken stub: ${full_name} → ${uuid}-result.json"
-      done <<< "$all_tests_tsv"
+      done <<< "$all_tests_jsonl"
 
       # If we resolved fewer stubs than missed (e.g. list was incomplete), fill with placeholders
       local remaining=$(( missed - written ))
@@ -271,6 +421,7 @@ EOF
 # _write_placeholder_stubs
 #
 # Writes N placeholder broken stubs named "Missed test #start_index" …
+# Project/parentSuite is inferred from existing results when possible.
 #
 # Args:
 #   $1  results_dir   — path to allure-results/
@@ -286,38 +437,22 @@ _write_placeholder_stubs() {
   local ts_ms="$4"
   local status_msg="$5"
 
-  local i
-  for (( i = 0; i < count; i++ )); do
-    local idx=$(( start_index + i ))
-    local uuid
-    uuid=$(cat /proc/sys/kernel/random/uuid 2>/dev/null || \
-           od -x /dev/urandom | head -1 | awk '{print $2$3"-"$4"-"$5"-"$6"-"$7$8$9}')
+  # Prefer nesting under the existing Allure tree (majority project + suite).
+  # No invented "OOM / Aborted" branch when real results already exist.
+  local project suite_name
+  project=$(_infer_majority_project "$results_dir")
+  suite_name=$(_infer_majority_label "$results_dir" "suite")
+  if [ -z "$project" ]; then
+    project="Missed Tests"
+    suite_name=""
+  fi
 
-    cat > "${results_dir}/${uuid}-result.json" <<EOF
-{
-  "uuid": "${uuid}",
-  "name": "Missed test #${idx}",
-  "fullName": "missed-test-${idx}",
-  "status": "broken",
-  "stage": "finished",
-  "labels": [
-    {"name": "language",    "value": "javascript"},
-    {"name": "framework",   "value": "playwright"},
-    {"name": "parentSuite", "value": "Missed Tests"},
-    {"name": "suite",       "value": "OOM / Aborted"}
-  ],
-  "statusDetails": {
-    "message": "${status_msg}",
-    "trace": ""
-  },
-  "start": ${ts_ms},
-  "stop":  ${ts_ms},
-  "steps": [],
-  "attachments": [],
-  "parameters": [],
-  "links": []
-}
-EOF
+  local i idx uuid
+  for (( i = 0; i < count; i++ )); do
+    idx=$(( start_index + i ))
+    uuid=$(_new_uuid)
+    _write_allure_stub "$results_dir" "$uuid" "Missed test #${idx}" "missed-test-${idx}" \
+      "$project" "$suite_name" "" "$ts_ms" "$status_msg"
     echo "✅ [detect-missed-tests] Wrote placeholder stub #${idx} → ${uuid}-result.json"
   done
 }
