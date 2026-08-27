@@ -29,6 +29,28 @@ teardown() {
     [ "$PROJECT_DIR" = "$TMP_DIR/TestGeneration" ] || [ "$PROJECT_DIR" = "$(realpath "$TMP_DIR/TestGeneration")" ]
 }
 
+@test "postman_collection under TestGeneration does not make root win" {
+    mkdir -p "$TMP_DIR/TestGeneration"
+    echo "{}" > "$TMP_DIR/TestGeneration/api.postman_collection.json"
+    _resolve_project_dir "$TMP_DIR"
+    [ "$PROJECT_DIR" = "$TMP_DIR/TestGeneration" ] || [ "$PROJECT_DIR" = "$(realpath "$TMP_DIR/TestGeneration")" ]
+}
+
+@test "nested postman_collection under TestGeneration does not make root win" {
+    mkdir -p "$TMP_DIR/TestGeneration/collections"
+    echo "{}" > "$TMP_DIR/TestGeneration/collections/api.postman_collection.json"
+    _resolve_project_dir "$TMP_DIR"
+    [ "$PROJECT_DIR" = "$TMP_DIR/TestGeneration" ] || [ "$PROJECT_DIR" = "$(realpath "$TMP_DIR/TestGeneration")" ]
+}
+
+@test "postman_collection at root still wins over TestGeneration" {
+    echo "{}" > "$TMP_DIR/root.postman_collection.json"
+    mkdir -p "$TMP_DIR/TestGeneration"
+    echo "{}" > "$TMP_DIR/TestGeneration/api.postman_collection.json"
+    _resolve_project_dir "$TMP_DIR"
+    [ "$PROJECT_DIR" = "$TMP_DIR" ]
+}
+
 @test "root markers win over TestGeneration" {
     mkdir -p "$TMP_DIR/tests"
     mkdir -p "$TMP_DIR/TestGeneration/tests"
@@ -76,6 +98,13 @@ teardown() {
 
 @test "_finalize_clone validates markers under TestGeneration" {
     mkdir -p "$TMP_DIR/TestGeneration/tests"
+    _finalize_clone
+    [ "$PROJECT_DIR" = "$TMP_DIR/TestGeneration" ] || [ "$PROJECT_DIR" = "$(realpath "$TMP_DIR/TestGeneration")" ]
+}
+
+@test "_finalize_clone selects TestGeneration when only nested postman_collection exists" {
+    mkdir -p "$TMP_DIR/TestGeneration"
+    echo "{}" > "$TMP_DIR/TestGeneration/api.postman_collection.json"
     _finalize_clone
     [ "$PROJECT_DIR" = "$TMP_DIR/TestGeneration" ] || [ "$PROJECT_DIR" = "$(realpath "$TMP_DIR/TestGeneration")" ]
 }
