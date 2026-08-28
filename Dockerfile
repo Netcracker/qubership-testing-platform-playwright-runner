@@ -48,6 +48,10 @@ COPY --chown=runner:runner --chmod=755 entrypoint.sh /app/entrypoint.sh
 COPY --chown=runner:runner --chmod=755 detect-missed-tests.sh /app/detect-missed-tests.sh
 COPY --chown=runner:runner --chmod=755 capture-test-list.sh /app/capture-test-list.sh
 
+RUN chgrp -R 0 /app /scripts \
+    && chmod -R g=u /app /scripts \
+    && chmod g+rx /app /scripts
+
 USER 1007
 
 ENTRYPOINT ["/app/entrypoint.sh"]
