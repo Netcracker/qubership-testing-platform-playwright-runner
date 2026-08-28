@@ -1,6 +1,7 @@
 FROM mcr.microsoft.com/playwright:v1.62.1-noble
 
 ENV HOME_EX=/app
+ENV HOME=/app
 ENV BRU_BIN="/app/node_modules/@usebruno/cli/bin"
 
 RUN rm -f /etc/apt/sources.list.d/* && \
