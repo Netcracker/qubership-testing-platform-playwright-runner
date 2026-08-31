@@ -31,7 +31,6 @@
 | DEBUG_MODE                          | boolean | no        | `false`                                   | Enable additional debug behavior and logs in runner scripts.                                                                                                                                                                                                 |
 | PLAYWRIGHT_TRACE_MODE               | string  | no        | `retain-on-failure`                       | Defines when Playwright should record execution traces (trace.zip) for debugging. Supported values: `on`, `off`, `retain-on-failure`, `on-first-retry`. See [Playwright Native Report (Trace Configuration)](#playwright-native-report-trace-configuration). |
 | ATP_MONITORING_ENABLED              | boolean | no        | `false`                                   | Enable creation monitoring objects for runners.                                                                                                                                                                                                              |
-| SECURITY_CONTEXT_ENABLED            | boolean | no        | `false`                                   | Flag to enable or disable the security context for the Playwright Runner service .                                                                                                                                                                           |
 | ATP_METRICS_ENABLED                 | boolean | no        | `false`                                   | To enable metrics push; any other value skips (exit 0).                                                                                                                                                                                                      |
 | ATP_METRICS_URL                     | string  | no        | ``                                        | Base URL for VictoriaMetrics / vmagent.                                                                                                                                                                                                                      |
 | ATP_METRICS_TYPE                    | string  | no        | `pushgateway`                             | Possible values  `pushgateway` (default) or `vm-native` (POST to `/api/v1/import/prometheus` with `extra_label` query params).                                                                                                                               |
@@ -40,8 +39,13 @@
 | ATP_METRICS_PASS                    | string  | no        | ``                                        | HTTP Basic credentials when `ATP_METRICS_AUTH_TYPE=basic`.                                                                                                                                                                                                   |
 | ATP_METRICS_TOKEN                   | string  | no        | ``                                        | Bearer token when `ATP_METRICS_AUTH_TYPE=bearer`.                                                                                                                                                                                                            |
 | EXTRA_VARS                          | string  | no        | ``                                        | Extra Variables propagation from job. Example:`var1=value1,var2=value2,` or EXTRA_VARS=`var1=value1; var2=value2;.                                                                                                                                           |
-| podSecurityContext                  | object  | no        | `{ runAsUser: 1007, fsGroup: 1007 }`      | Kubernetes pod-level security context for the runner Job. Applied when `SECURITY_CONTEXT_ENABLED=true`. Sets UID/GID for pod processes and volume file ownership.                                                                                            |
+| POD_SECURITY_CONTEXT                | object  | no        | `{ runAsUser: 1007, fsGroup: 1007 }`      | UID/GID pin merged with chart defaults (`runAsNonRoot`, `seccompProfile`). `runAsUser`/`runAsGroup`/`fsGroup` are omitted when Helm sees `security.openshift.io/v1` (OpenShift `restricted-v2`). Always applied to the runner Job. |
+| CONTAINER_SECURITY_CONTEXT          | object  | no        | `{}`                                      | Optional overrides merged with chart defaults (`allowPrivilegeEscalation: false`, drop `ALL`). Always applied to the runner Job. |
 | TRIGGER_AUTHOR                      | string  | no        | `""`                                      | Optional technical parameter. Used to display the test run author in the report.                                                                                                                                                                             |
+
+The Job always gets a pod and container `securityContext` (`runAsNonRoot`, `RuntimeDefault` seccomp, drop `ALL` capabilities).
+
+On vanilla Kubernetes, `POD_SECURITY_CONTEXT` pins UID/GID **1007**. On OpenShift Helm detects `security.openshift.io/v1` and omits `runAsUser`/`runAsGroup`/`fsGroup` so `restricted-v2` can assign the project UID range. Offline `helm template` without `--api-versions security.openshift.io/v1` looks like Kubernetes and keeps the UID pin.
 
 ## EXTRA_VARS additional variables
 
@@ -49,9 +53,9 @@ The variables below can be only passed via EXTRA_VARS deployment variable
 
 | Parameter                           | Type    | Mandatory | Default value | Description                                                              |
 |-------------------------------------|---------|-----------|---------------|--------------------------------------------------------------------------|
-| ATP_TESTS_IGNORE_STRUCTURE          | string  | no        | `""`          | When `true`, skip the error if no standard repo markers (`app`/`tests`/`collections`/`postman_collection`) are found. |
+| ATP_TESTS_IGNORE_STRUCTURE          | string  | no        | `""`          | When `true`, skip the error if no standard repository markers (`app`/`tests`/`collections`/`postman_collection`) are found. |
 
-Example when the repo has a non-standard layout:
+Example when the repository has a non-standard layout:
 
 ```bash
 EXTRA_VARS=ATP_TESTS_IGNORE_STRUCTURE=true
@@ -64,7 +68,7 @@ When the runner clones the test repository, it determines the project root from 
 For each candidate, in order:
 
 1. Skip if the directory does not exist under the clone.
-2. Skip if it has no standard repo markers (`app/`, `tests/`, `collections/`, or `*postman_collection*` files).
+2. Skip if it has no standard repository markers (`app/`, `tests/`, `collections/`, or `*postman_collection*` files).
 3. First candidate that exists **and** has markers becomes `PROJECT_DIR`.
 
 If no candidate matches, the clone root is used. Structure validation then runs on `PROJECT_DIR`:
@@ -78,9 +82,9 @@ Malformed allowlist entries (absolute paths or paths containing `..`) are treate
 
 | Priority | Condition                                                         | Outcome                       |
 |----------|-------------------------------------------------------------------|-------------------------------|
-| 1        | `.` (clone root) has repo markers                                 | Use repo root                 |
-| 2        | `TestGeneration/` exists and has repo markers                     | Use `TestGeneration/`         |
-| 3        | None matched; `ATP_TESTS_IGNORE_STRUCTURE=true`                   | Use repo root (with warning)  |
+| 1        | `.` (clone root) has repository markers                                 | Use repository root                 |
+| 2        | `TestGeneration/` exists and has repository markers                     | Use `TestGeneration/`         |
+| 3        | None matched; `ATP_TESTS_IGNORE_STRUCTURE=true`                   | Use repository root (with warning)  |
 | 4        | None matched; no ignore flag                                      | Error, job fails              |
 
 See `scripts/git-clone.sh` for implementation details.

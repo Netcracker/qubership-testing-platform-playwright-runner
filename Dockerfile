@@ -1,6 +1,7 @@
 FROM mcr.microsoft.com/playwright:v1.62.1-noble
 
 ENV HOME_EX=/app
+ENV HOME=/app
 ENV BRU_BIN="/app/node_modules/@usebruno/cli/bin"
 
 RUN rm -f /etc/apt/sources.list.d/* && \
@@ -47,6 +48,10 @@ COPY --chown=runner:runner scripts/runtimes/playwright-setup.sh /scripts/runtime
 COPY --chown=runner:runner --chmod=755 entrypoint.sh /app/entrypoint.sh
 COPY --chown=runner:runner --chmod=755 detect-missed-tests.sh /app/detect-missed-tests.sh
 COPY --chown=runner:runner --chmod=755 capture-test-list.sh /app/capture-test-list.sh
+
+RUN chgrp -R 0 /app /scripts \
+    && chmod -R g=u /app /scripts \
+    && chmod g+rx /app /scripts
 
 USER 1007
 
