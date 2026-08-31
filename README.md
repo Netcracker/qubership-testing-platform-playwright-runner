@@ -43,9 +43,9 @@
 | CONTAINER_SECURITY_CONTEXT          | object  | no        | `{}`                                      | Optional overrides merged with chart defaults (`allowPrivilegeEscalation: false`, drop `ALL`). Always applied to the runner Job. |
 | TRIGGER_AUTHOR                      | string  | no        | `""`                                      | Optional technical parameter. Used to display the test run author in the report.                                                                                                                                                                             |
 
-The Job always gets a pod and container `securityContext` (`runAsNonRoot`, `RuntimeDefault` seccomp, drop `ALL` capabilities). 
-On vanilla Kubernetes, `POD_SECURITY_CONTEXT` pins UID/GID **1007**. 
-On OpenShift Helm detects `security.openshift.io/v1` and omits `runAsUser`/`runAsGroup`/`fsGroup` so `restricted-v2` can assign the project UID range. Offline `helm template` without `--api-versions security.openshift.io/v1` looks like Kubernetes and keeps the UID pin.
+The Job always gets a pod and container `securityContext` (`runAsNonRoot`, `RuntimeDefault` seccomp, drop `ALL` capabilities).
+
+On vanilla Kubernetes, `POD_SECURITY_CONTEXT` pins UID/GID **1007**. On OpenShift Helm detects `security.openshift.io/v1` and omits `runAsUser`/`runAsGroup`/`fsGroup` so `restricted-v2` can assign the project UID range. Offline `helm template` without `--api-versions security.openshift.io/v1` looks like Kubernetes and keeps the UID pin.
 
 ## EXTRA_VARS additional variables
 
