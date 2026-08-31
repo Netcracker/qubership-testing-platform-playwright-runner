@@ -1,3 +1,9 @@
+# Rebuild s5cmd with patched Go (Xray: github.com/golang/go 1.22.10 -> 1.26.6).
+FROM golang:1.26.6-bookworm AS s5cmd
+RUN git clone --depth 1 --branch v2.3.0 https://github.com/peak/s5cmd.git /src
+WORKDIR /src
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o /s5cmd .
+
 FROM mcr.microsoft.com/playwright:v1.62.1-noble
 
 ENV HOME_EX=/app
@@ -21,12 +27,12 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-reco
     inotify-tools \
     && rm -rf /var/lib/apt/lists/*
 
-RUN curl -L -o /tmp/s5cmd.tar.gz \
-    https://github.com/peak/s5cmd/releases/download/v2.3.0/s5cmd_2.3.0_Linux-64bit.tar.gz && \
-    tar -xzf /tmp/s5cmd.tar.gz -C /tmp && \
-    mv /tmp/s5cmd /usr/local/bin/ && \
-    chmod +x /usr/local/bin/s5cmd && \
-    rm -rf /tmp/s5cmd*
+COPY --from=s5cmd /s5cmd /usr/local/bin/s5cmd
+RUN chmod +x /usr/local/bin/s5cmd
+
+# Playwright image ships yarn 1.22.22 (CVE-2025-9308, no newer 1.x). Runner does not use it.
+RUN npm uninstall -g yarn >/dev/null 2>&1 || true; \
+    rm -rf /usr/lib/node_modules/yarn /usr/bin/yarn /usr/bin/yarnpkg
 
 RUN groupadd -g 1007 runner && \
     useradd -u 1007 -g runner -m -d "$HOME_EX" runner && \
@@ -36,7 +42,7 @@ RUN groupadd -g 1007 runner && \
 WORKDIR $HOME_EX
 
 COPY package.json package-lock.json .npmrc ./
-RUN npm install -g npm@11.10.1 --no-fund --no-audit
+RUN npm install -g npm@11.19.0 --no-fund --no-audit
 RUN npm set strict-ssl=false && \
     npm init -y && \
     npm ci
