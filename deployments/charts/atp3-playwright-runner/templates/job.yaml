@@ -85,6 +85,8 @@ spec:
             value: "{{ .Values.EXTRA_VARS }}"
           - name: TRIGGER_AUTHOR
             value: "{{ .Values.TRIGGER_AUTHOR }}"
+          - name: CI_PIPELINE_SOURCE
+            value: "{{ .Values.CI_PIPELINE_SOURCE }}"
           - name: ATP_APPLICATION_VERSION
             value: "{{ .Values.APPLICATION_NAME }}:{{ .Values.ARTIFACT_DESCRIPTOR_VERSION }}"
           - name: ATP_ENVGENE_CONFIGURATION
