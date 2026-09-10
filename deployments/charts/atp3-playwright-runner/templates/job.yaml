@@ -89,8 +89,6 @@ spec:
             value: "{{ .Values.ORIGINAL_PIPELINE_SOURCE }}"
           - name: ATP_APPLICATION_VERSION
             value: "{{ .Values.APPLICATION_NAME }}:{{ .Values.ARTIFACT_DESCRIPTOR_VERSION }}"
-          - name: VARIABLES
-            value: '{{ .Values | toJson }}'
           - name: ATP_ENVGENE_CONFIGURATION
             valueFrom:
               secretKeyRef:
