@@ -34,6 +34,15 @@ _run_calculate() {
     "
 }
 
+_run_file_details() {
+    bash -c "
+        ln -sfn '$TMP_DIR' /tmp/clone
+        source '$CALCULATE_SCRIPT' '$TMP_DIR/allure-results'
+        echo \"TEST_FILE_DETAILS_FILE=\$TEST_FILE_DETAILS_FILE\"
+        cat \"\$TEST_FILE_DETAILS_FILE\"
+    "
+}
+
 @test "retry-pass deduplicates by historyId and counts one passed test" {
     _copy_fixture retry-pass
     run _run_calculate
@@ -57,4 +66,46 @@ _run_calculate() {
     run _run_calculate
     [ "$status" -eq 0 ]
     echo "$output" | grep -q 'TEST_TOTAL_COUNT=2'
+}
+
+@test "file details group runnable spec paths by their effective status" {
+    _copy_fixture file-status
+    run _run_file_details
+    [ "$status" -eq 0 ]
+    echo "$output" | grep -q 'TEST_FILE_DETAILS_FILE='
+    echo "$output" | grep -q '^FAILED | e2e/checkout.spec.ts$'
+    echo "$output" | grep -q '^FAILED | e2e/profile.spec.ts$'
+    echo "$output" | grep -q '^PASSED | e2e/login.spec.ts$'
+    echo "$output" | grep -q '^PASSED | e2e/search.spec.ts$'
+    ! echo "$output" | grep -q 'Backend.Users.getProfile'
+    [ "$(echo "$output" | grep -Ec '^(PASSED|FAILED) \| ')" -eq 4 ]
+}
+
+@test "file details strip leading ../ so the path can be reused as test input" {
+    _copy_fixture relative-parent
+    run _run_file_details
+    [ "$status" -eq 0 ]
+    echo "$output" | grep -q '^PASSED | tests/TestScenario/foo.test.ts$'
+    ! echo "$output" | grep -q '\.\./'
+}
+
+@test "file details omit TagHelper wrapper paths that are not specs" {
+    _copy_fixture tag-helper-only
+    run _run_file_details
+    [ "$status" -eq 0 ]
+    ! echo "$output" | grep -q 'Engine/Shared/TagHelper.ts'
+    [ "$(echo "$output" | grep -Ec '^(PASSED|FAILED) \| ')" -eq 0 ]
+}
+
+@test "file details use Allure suite spec names instead of TagHelper wrapper" {
+    _copy_fixture tag-helper-wrapper
+    mkdir -p "$TMP_DIR/tests/TestScenario"
+    touch "$TMP_DIR/tests/TestScenario/simplePlaywrightEnvConfiguration.test.ts"
+    touch "$TMP_DIR/tests/TestScenario/simplePlaywrightBrowserLaunchSanity.test.ts"
+    run _run_file_details
+    [ "$status" -eq 0 ]
+    echo "$output" | grep -q '^PASSED | tests/TestScenario/simplePlaywrightBrowserLaunchSanity.test.ts$'
+    echo "$output" | grep -q '^PASSED | tests/TestScenario/simplePlaywrightEnvConfiguration.test.ts$'
+    ! echo "$output" | grep -q 'Engine/Shared/TagHelper.ts'
+    [ "$(echo "$output" | grep -Ec '^(PASSED|FAILED) \| ')" -eq 2 ]
 }
