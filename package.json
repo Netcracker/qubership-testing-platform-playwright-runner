@@ -41,6 +41,7 @@
     "rimraf": "5.0.0",
     "typescript": "5.9.3",
     "unique-names-generator": "4.7.1",
+    "unzipper": "^0.12.5",
     "write-excel-file": "4.1.1"
   },
   "dependencies": {
@@ -82,7 +83,6 @@
     "browserslist": "4.28.7",
     "ip-address": "10.3.1",
     "async": "3.2.6",
-    "unzipper": "0.12.5",
     "postcss-selector-parser": "7.1.2",
     "picomatch": "4.0.7",
     "fast-xml-builder": "1.1.7",
