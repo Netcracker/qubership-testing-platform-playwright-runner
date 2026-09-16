@@ -17,18 +17,14 @@ RUN rm -f /etc/apt/sources.list.d/* && \
     echo "deb [arch=amd64] http://security.ubuntu.com/ubuntu noble-security main multiverse restricted universe" >> /etc/apt/sources.list
 
 RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
-    curl \
     unzip \
-    git \
     nano \
-    bash \
     file \
     jq \
     inotify-tools \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=s5cmd /s5cmd /usr/local/bin/s5cmd
-RUN chmod +x /usr/local/bin/s5cmd
+COPY --from=s5cmd --chmod=755 /s5cmd /usr/local/bin/s5cmd
 
 # Playwright image ships yarn 1.22.22 (CVE-2025-9308, no newer 1.x). Runner does not use it.
 RUN npm uninstall -g yarn >/dev/null 2>&1 || true; \
@@ -42,22 +38,28 @@ RUN groupadd -g 1007 runner && \
 WORKDIR $HOME_EX
 
 COPY package.json package-lock.json .npmrc ./
-RUN npm install -g npm@11.19.0 --no-fund --no-audit
-RUN npm set strict-ssl=false && \
-    npm init -y && \
-    npm ci
-
-RUN chown -R runner:runner $HOME_EX
-
 COPY --chown=runner:runner --chmod=755 scripts/ /scripts/
 COPY --chown=runner:runner scripts/runtimes/playwright-setup.sh /scripts/runtime-setup.sh
 COPY --chown=runner:runner --chmod=755 entrypoint.sh /app/entrypoint.sh
 COPY --chown=runner:runner --chmod=755 detect-missed-tests.sh /app/detect-missed-tests.sh
 COPY --chown=runner:runner --chmod=755 capture-test-list.sh /app/capture-test-list.sh
 
-RUN chgrp -R 0 /app /scripts \
-    && chmod -R g=u /app /scripts \
-    && chmod g+rx /app /scripts
+RUN npm install -g npm@11.19.0 --no-fund --no-audit
+# Permissions must be set in the same layer as npm ci: a separate chown/chmod
+# layer would store a full second copy of node_modules (~660MB each).
+# chgrp 0 + g=u supports OpenShift restricted-v2 (arbitrary UID, always gid 0)
+# while Kubernetes can still run the container as USER 1007 via owner perms.
+# Group-writable /etc/passwd lets the entrypoint register the arbitrary UID.
+RUN npm set strict-ssl=false && \
+    npm init -y && \
+    npm ci && \
+    rm -rf "$HOME_EX/.npm" && \
+    chown -R runner:runner "$HOME_EX" && \
+    chgrp -R 0 /app /scripts && \
+    chmod -R g=u /app /scripts && \
+    chmod g+rx /app /scripts && \
+    chgrp 0 /etc/passwd && \
+    chmod g=u /etc/passwd
 
 USER 1007
 
