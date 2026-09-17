@@ -3,6 +3,7 @@
 - [Deploy parameters](#deploy-parameters)
 - [Hardware / Resource Requirements (HWE)](#hardware--resource-requirements-hwe)
 - [Playwright Native Report (Trace Configuration)](#playwright-native-report-trace-configuration)
+- [OpenTelemetry (B3) Trace Headers](#opentelemetry-b3-trace-headers)
 
 ## Deploy parameters
 
@@ -19,6 +20,8 @@
 | ATP_REPORT_VIEW_UI_URL              | string  | **yes**   | `""`                                      | URL for viewing generated test reports.                                                                                                                                                                                                                      |
 | ATP_TESTS_GIT_TOKEN                 | string  | **yes**   | `""`                                      | Access token for private Git repositories with tests.                                                                                                                                                                                                        |
 | TEST_PARAMS                         | JSON    | **yes**   | `{}`                                      | Specify what test or scope should be run, for example: `'{"execution_list":[{"type": "scope","name": "regression"}]}'`                                                                                                                                       |
+| PROJECT_ID                          | string  | **yes**   | `""`                                      | Project identifier from the orchestrator, used as-is in the `X-B3-TraceId` header. See [OpenTelemetry (B3) Trace Headers](#opentelemetry-b3-trace-headers).                                                                                                 |
+| RUN_ID                              | string  | **yes**   | `""`                                      | Test run identifier from the orchestrator, used as-is in the `X-B3-TraceId` header. See [OpenTelemetry (B3) Trace Headers](#opentelemetry-b3-trace-headers).                                                                                                |
 | ATP_ENVGENE_CONFIGURATION           | JSON    | no        | `{}`                                      | Additional test parameters (Systems) to pass to test runner from EnvGene.                                                                                                                                                                                    |
 | ATP_TESTS_GIT_REPO_BRANCH           | string  | no        | `main`                                    | Git branch to checkout.                                                                                                                                                                                                                                      |
 | ATP_STORAGE_PROVIDER                | string  | no        | `"minio"`                                 | Type of S3 storage (e.g., minio, aws).                                                                                                                                                                                                                       |
@@ -142,6 +145,39 @@ To debug a test using Playwright trace:
 
 4. Inspect the test execution. The trace viewer will open in your browser, allowing you to: replay test steps, view
    console logs & network requests, inspect DOM snapshots at each action.
+
+## OpenTelemetry (B3) trace headers
+
+The runner can stamp every request your test makes with B3 trace headers, so a tail-sampling collector can group the
+calls one Playwright test makes under a single trace.
+
+| Header         | Value                                               | Scope                               |
+|----------------|------------------------------------------------------|---------------------------------------|
+| `X-B3-TraceId` | `<PROJECT_ID><RUN_ID><testcase_id>` (13 characters) | Fixed for one test, across retries    |
+| `X-B3-SpanId`  | 16 lowercase hex characters                          | Fresh on every intercepted request    |
+| `X-B3-Sampled` | `1`                                                  | Always                                |
+
+`PROJECT_ID` and `RUN_ID` are used as-is from the orchestrator; `testcase_id` is derived from Playwright's own
+`testInfo.testId`, so it stays the same across retries of one test.
+
+Unlike the Bruno and Newman runners, a Playwright test suite is your own code, so the runner can't add these headers
+on its own. Import `test` and `expect` from `atp-b3-trace` instead of `@playwright/test` in the files where you want
+header propagation:
+
+```javascript
+const { test, expect } = require('atp-b3-trace');
+
+test('creates an order', async ({ page, request }) => {
+  await page.goto('/orders/new');   // carries X-B3-TraceId/SpanId/Sampled
+  await request.post('/api/orders', { data: { ... } }); // carries them too
+});
+```
+
+`atp-b3-trace` re-exports `@playwright/test`'s `test`, with the `page` and `request` fixtures extended to add the
+headers to every request; nothing else about your test changes. The package is installed as part of the runner
+image, so no entry in your own `package.json` is needed.
+
+Headers are skipped, with no error, when `PROJECT_ID` or `RUN_ID` is not set.
 
 ## Metrics (VictoriaMetrics)
 

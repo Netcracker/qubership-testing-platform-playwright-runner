@@ -47,6 +47,12 @@ RUN npm set strict-ssl=false && \
     npm init -y && \
     npm ci
 
+# Local helper packages that cloned test suites import at runtime (see runtime-setup.sh, which
+# copies node_modules into the project dir). Copied in directly rather than added as npm "file:"
+# dependencies, so they land as real directories instead of symlinks that would dangle once
+# node_modules is copied elsewhere.
+COPY packages/atp-b3-trace/ node_modules/atp-b3-trace/
+
 RUN chown -R runner:runner $HOME_EX
 
 COPY --chown=runner:runner --chmod=755 scripts/ /scripts/
