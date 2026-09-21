@@ -173,7 +173,7 @@ test('creates an order', async ({ page, request }) => {
 });
 ```
 
-`atp-b3-trace` re-exports `@playwright/test`'s `test`, with the `page` and `request` fixtures extended to add the
+`atp-b3-trace` reexports `@playwright/test`'s `test`, with the `page` and `request` fixtures extended to add the
 headers to every request; nothing else about your test changes. The package is installed as part of the runner
 image, so no entry in your own `package.json` is needed.
 

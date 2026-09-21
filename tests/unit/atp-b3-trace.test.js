@@ -1,3 +1,4 @@
+/* global require, process */
 // Unit tests for packages/atp-b3-trace — run with: node --test tests/unit/atp-b3-trace.test.js
 'use strict';
 

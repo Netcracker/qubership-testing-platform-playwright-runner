@@ -1,3 +1,4 @@
+/* global require, module, process */
 // atp-b3-trace — B3 trace/span header propagation for Playwright test suites.
 //
 // Header contract (shared with the other ATP runners):
