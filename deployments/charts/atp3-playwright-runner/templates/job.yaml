@@ -51,6 +51,8 @@ spec:
             value: "{{ .Values.ATP_STORAGE_SERVER_UI_URL }}"
           - name: ATP_REPORT_VIEW_UI_URL
             value: "{{ .Values.ATP_REPORT_VIEW_UI_URL }}"
+          - name: ATP_ALLURE_PROC_HOST
+            value: "{{ .Values.ATP_ALLURE_PROC_HOST }}"
           - name: ATP_RUNNER_JOB_EXIT_STRATEGY
             value: "{{ .Values.ATP_RUNNER_JOB_EXIT_STRATEGY }}"
           - name: CURRENT_DATE
