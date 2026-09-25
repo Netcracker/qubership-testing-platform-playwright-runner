@@ -51,10 +51,16 @@ spec:
             value: "{{ .Values.ATP_STORAGE_SERVER_UI_URL }}"
           - name: ATP_REPORT_VIEW_UI_URL
             value: "{{ .Values.ATP_REPORT_VIEW_UI_URL }}"
+          - name: ATP_ALLURE_REPORT_GENERATE_IN_RUNNER
+            value: "{{ .Values.ATP_ALLURE_REPORT_GENERATE_IN_RUNNER }}"
           - name: ATP_ALLURE_PROC_HOST
             value: "{{ .Values.ATP_ALLURE_PROC_HOST }}"
           - name: ATP_ALLURE_PROC_INSECURE
             value: "{{ .Values.ATP_ALLURE_PROC_INSECURE }}"
+          - name: JIRA_BASE_URL
+            value: "{{ .Values.JIRA_BASE_URL }}"
+          - name: JIRA_PROJECT_KEY
+            value: "{{ .Values.JIRA_PROJECT_KEY }}"
           - name: ATP_RUNNER_JOB_EXIT_STRATEGY
             value: "{{ .Values.ATP_RUNNER_JOB_EXIT_STRATEGY }}"
           - name: CURRENT_DATE
@@ -113,6 +119,16 @@ spec:
               secretKeyRef:
                 name: {{ include "atp3-playwright-runner.fullname" . }}-secret
                 key: atpStoragePassword
+          - name: JIRA_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "atp3-playwright-runner.fullname" . }}-secret
+                key: jiraUsername
+          - name: JIRA_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "atp3-playwright-runner.fullname" . }}-secret
+                key: jiraPassword
           - name: DEFAULT_TENANT_ADMIN_LOGIN
             valueFrom:
               secretKeyRef:

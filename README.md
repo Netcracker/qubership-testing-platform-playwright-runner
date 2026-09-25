@@ -17,6 +17,7 @@
 | ATP_STORAGE_SERVER_URL              | string  | **yes**   | `""`                                      | API endpoint for accessing S3 storage.                                                                                                                                                                                                                       |
 | ATP_STORAGE_SERVER_UI_URL           | string  | **yes**   | `""`                                      | Web UI endpoint for viewing files in the S3 bucket.                                                                                                                                                                                                          |
 | ATP_REPORT_VIEW_UI_URL              | string  | **yes**   | `""`                                      | URL for viewing generated test reports.                                                                                                                                                                                                                      |
+| ATP_ALLURE_REPORT_GENERATE_IN_RUNNER | boolean | no       | `false`                                   | Generate, style, and upload the Allure report in this Job. This mode takes precedence over `ATP_ALLURE_PROC_HOST` and does not upload the completion marker.                                                                                                  |
 | ATP_ALLURE_PROC_HOST                | string  | no        | `""`                                      | Base URL of allure-proc. When set, POST `/transform` after the completion marker is uploaded. Empty or unset skips the call.                                                                                                                                 |
 | ATP_ALLURE_PROC_INSECURE            | boolean | no        | `true`                                    | When `true`, the allure-proc POST uses `curl --insecure` and skips TLS certificate verification. Set `false` to verify the server certificate.                                                                                                               |
 | ATP_TESTS_GIT_TOKEN                 | string  | **yes**   | `""`                                      | Access token for private Git repositories with tests.                                                                                                                                                                                                        |
@@ -29,6 +30,10 @@
 | ATP_RUNNER_JOB_TTL                  | integer | no        | `43200`                                   | Time-to-live for the test job in seconds.                                                                                                                                                                                                                    |
 | ATP_RUNNER_JOB_EXIT_STRATEGY        | integer | no        | `0`                                       | Delay in seconds before job termination (for debugging).                                                                                                                                                                                                     |
 | ENABLE_JIRA_INTEGRATION             | boolean | no        | `false`                                   | Enable Jira integration for tests.                                                                                                                                                                                                                           |
+| JIRA_BASE_URL                       | string  | no        | `""`                                      | HTTPS Jira base URL used when runner-side report generation and Jira integration are enabled.                                                                                                                                                               |
+| JIRA_USERNAME                       | string  | no        | `""`                                      | Jira username, stored in the runner Secret.                                                                                                                                                                                                                  |
+| JIRA_PASSWORD                       | string  | no        | `""`                                      | Jira password or token, stored in the runner Secret.                                                                                                                                                                                                         |
+| JIRA_PROJECT_KEY                    | string  | no        | `""`                                      | Jira project key used to validate runner-side integration configuration.                                                                                                                                                                                     |
 | EXPECTED_PASS_RATE                  | string  | no        | `80`                                      | If Pass Rate >= EXPECTED_PASS_RATE < 100 then result status is PARTIAL                                                                                                                                                                                       |
 | DEBUG_MODE                          | boolean | no        | `false`                                   | Enable additional debug behavior and logs in runner scripts.                                                                                                                                                                                                 |
 | PLAYWRIGHT_TRACE_MODE               | string  | no        | `retain-on-failure`                       | Defines when Playwright should record execution traces (trace.zip) for debugging. Supported values: `on`, `off`, `retain-on-failure`, `on-first-retry`. See [Playwright Native Report (Trace Configuration)](#playwright-native-report-trace-configuration). |
@@ -102,6 +107,27 @@ Supported 2 profiles: `dev`, `prod`.
 | MEMORY_LIMIT   | 2000Mi | 3000Mi |
 | CPU_REQUEST    | 100m   | 100m   |
 | CPU_LIMIT      | 500m   | 1000m  |
+
+The chart defaults to `1500Mi`/`3000Mi` memory and `250m`/`1000m` CPU
+request/limit. Use at least the production profile when
+`ATP_ALLURE_REPORT_GENERATE_IN_RUNNER=true`; large result sets may require more
+memory because test execution and Allure generation share one container.
+
+## Allure report generation modes
+
+- Runner: set `ATP_ALLURE_REPORT_GENERATE_IN_RUNNER=true`. The Job generates and
+  uploads the report, viewer link, and optional Jira updates. This setting wins
+  even when `ATP_ALLURE_PROC_HOST` is configured.
+- External: leave the flag `false` and configure `ATP_ALLURE_PROC_HOST`. The Job
+  uploads `allure-results.uploaded` and calls allure-proc as before.
+- Upload-only: leave the flag `false` and the host empty. Results and the
+  completion marker are uploaded, but the runner does not directly generate or
+  request a report.
+
+Before enabling runner mode, disable bucket/SQS/Lambda notifications for
+`allure-results.uploaded`. Runner mode omits that marker to prevent duplicate
+generation. After all environments use runner mode, allure-proc can be
+decommissioned.
 
 ## Playwright Native Report (Trace Configuration)
 
