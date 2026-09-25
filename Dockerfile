@@ -22,6 +22,7 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-reco
     file \
     jq \
     inotify-tools \
+    openjdk-21-jre-headless \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=s5cmd --chmod=755 /s5cmd /usr/local/bin/s5cmd

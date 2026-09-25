@@ -23,6 +23,10 @@ source /scripts/test-runner.sh
 # shellcheck disable=SC1091
 source /scripts/test-runner-bruno.sh
 # shellcheck disable=SC1091
+source /scripts/allure-report.sh
+# shellcheck disable=SC1091
+source /scripts/jira-integration.sh
+# shellcheck disable=SC1091
 source /scripts/upload-monitor.sh
 # shellcheck disable=SC1091
 source /scripts/email-notification/generate-email-notification-json.sh
