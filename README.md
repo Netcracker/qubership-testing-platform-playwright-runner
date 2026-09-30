@@ -42,6 +42,9 @@
 | POD_SECURITY_CONTEXT                | object  | no        | `{ runAsUser: 1007, fsGroup: 1007 }`      | UID/GID pin merged with chart defaults (`runAsNonRoot`, `seccompProfile`). `runAsUser`/`runAsGroup`/`fsGroup` are omitted when Helm sees `security.openshift.io/v1` (OpenShift `restricted-v2`). Always applied to the runner Job. |
 | CONTAINER_SECURITY_CONTEXT          | object  | no        | `{}`                                      | Optional overrides merged with chart defaults (`allowPrivilegeEscalation: false`, drop `ALL`). Always applied to the runner Job. |
 | TRIGGER_AUTHOR                      | string  | no        | `""`                                      | Optional technical parameter. Used to display the test run author in the report.                                                                                                                                                                             |
+| TYPE_RUN                            | string  | no        | `""`                                      | Run type added to every Allure test result as the `type_run` label. It can be supplied through `EXTRA_VARS`.                                                                                                                                                |
+
+Allure label names are controlled by the runner. To support another run-wide label, add its environment-variable-to-label-name mapping to `scripts/allure-labels.sh`; callers provide only the mapped variable values.
 
 The Job always gets a pod and container `securityContext` (`runAsNonRoot`, `RuntimeDefault` seccomp, drop `ALL` capabilities).
 
