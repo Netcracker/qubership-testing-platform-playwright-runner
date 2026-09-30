@@ -42,16 +42,15 @@ RUN groupadd -g 1007 runner && \
 WORKDIR $HOME_EX
 
 COPY package.json package-lock.json .npmrc ./
+# Local helper packages that cloned test suites import at runtime, installed as npm "file:"
+# dependencies (see package.json) — copied in before `npm ci` so it can resolve them. The
+# resulting node_modules/atp-b3-trace symlink is why runtime-setup.sh also copies packages/
+# alongside node_modules: see its comment for why.
+COPY packages/ ./packages/
 RUN npm install -g npm@11.19.0 --no-fund --no-audit
 RUN npm set strict-ssl=false && \
     npm init -y && \
     npm ci
-
-# Local helper packages that cloned test suites import at runtime (see runtime-setup.sh, which
-# copies node_modules into the project dir). Copied in directly rather than added as npm "file:"
-# dependencies, so they land as real directories instead of symlinks that would dangle once
-# node_modules is copied elsewhere.
-COPY packages/atp-b3-trace/ node_modules/atp-b3-trace/
 
 RUN chown -R runner:runner $HOME_EX
 

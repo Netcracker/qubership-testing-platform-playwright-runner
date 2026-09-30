@@ -48,6 +48,7 @@
     "@kubernetes/client-node": "1.4.0",
     "@types/node-fetch": "2.6.12",
     "@usebruno/cli": "3.5.3",
+    "atp-b3-trace": "file:packages/atp-b3-trace",
     "docx": "9.7.1",
     "https": "1.0.0",
     "marked": "18.0.5",
