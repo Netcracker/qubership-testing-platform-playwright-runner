@@ -43,9 +43,10 @@ WORKDIR $HOME_EX
 
 COPY package.json package-lock.json .npmrc ./
 # Local helper packages that cloned test suites import at runtime, installed as npm "file:"
-# dependencies (see package.json) — copied in before `npm ci` so it can resolve them. The
-# resulting node_modules/atp-b3-trace symlink is why runtime-setup.sh also copies packages/
-# alongside node_modules: see its comment for why.
+# dependencies (see package.json) — copied in before `npm ci` so it can resolve them.
+# npm symlinks node_modules/atp-b3-trace to packages/atp-b3-trace. playwright-setup.sh
+# replaces that symlink with a real copy in the clone so the package resolves the
+# clone's @playwright/test instead of /app's.
 COPY packages/ ./packages/
 RUN npm install -g npm@11.19.0 --no-fund --no-audit
 RUN npm set strict-ssl=false && \
