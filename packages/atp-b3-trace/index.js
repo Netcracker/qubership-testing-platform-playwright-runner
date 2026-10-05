@@ -10,26 +10,7 @@
 // from Playwright's own testInfo.testId, so it stays the same across retries of one test.
 
 const crypto = require('crypto');
-const path = require('path');
-const { createRequire } = require('module');
-
-// Installed as a file: symlink to /app/packages/atp-b3-trace. Node resolves modules
-// from that real path, so a plain require('@playwright/test') loads /app's copy
-// after playwright.config.js already loaded the clone's copy. Playwright rejects
-// that second instance. Resolve the peer from the project directory, same as the config.
-function requirePlaywrightTest() {
-  const projectRequire = createRequire(path.join(process.cwd(), 'package.json'));
-  try {
-    return projectRequire('@playwright/test');
-  } catch (err) {
-    if (err && err.code === 'MODULE_NOT_FOUND') {
-      return require('@playwright/test');
-    }
-    throw err;
-  }
-}
-
-const base = requirePlaywrightTest();
+const base = require('@playwright/test');
 
 function randomHex16() {
   return crypto.randomBytes(8).toString('hex');
