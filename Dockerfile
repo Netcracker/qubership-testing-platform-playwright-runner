@@ -61,6 +61,9 @@ RUN npm set strict-ssl=false && \
     chgrp 0 /etc/passwd && \
     chmod g=u /etc/passwd
 
+# Microsoft Edge is not bundled in the official Playwright Docker image.
+RUN npx playwright install msedge && rm -rf /var/lib/apt/lists/*
+
 USER 1007
 
 ENTRYPOINT ["/app/entrypoint.sh"]
