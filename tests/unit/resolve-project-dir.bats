@@ -82,6 +82,7 @@ teardown() {
 
 @test "parent-segment allowlist entry hard-fails" {
     mkdir -p "$TMP_DIR/tests"
+    # shellcheck disable=SC2034
     PROJECT_ROOT_CANDIDATES=("../escape")
     run _resolve_project_dir "$TMP_DIR"
     [ "$status" -eq 1 ]

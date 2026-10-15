@@ -34,7 +34,7 @@ _clone_allure_fixtures() {
     "
     [ "$status" -eq 0 ]
     echo "$output" | grep -q 'TEST_DETAILS_FILE='
-    ! echo "$output" | grep -q 'STRING_STILL_SET'
+    [[ "$output" != *STRING_STILL_SET* ]]
 }
 
 @test "generate_email_notification_json builds deduplicated test_details from allure files" {
