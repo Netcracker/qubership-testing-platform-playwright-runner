@@ -44,7 +44,14 @@ COPY --chown=runner:runner --chmod=755 entrypoint.sh /app/entrypoint.sh
 COPY --chown=runner:runner --chmod=755 detect-missed-tests.sh /app/detect-missed-tests.sh
 COPY --chown=runner:runner --chmod=755 capture-test-list.sh /app/capture-test-list.sh
 
+# Local helper packages that cloned test suites import at runtime, installed as npm "file:"
+# dependencies (see package.json) — copied in before `npm ci` so it can resolve them. The
+# resulting node_modules/atp-b3-trace symlink is why runtime-setup.sh also copies packages/
+# alongside node_modules: see its comment for why.
+COPY packages/ ./packages/
+
 RUN npm install -g npm@11.19.0 --no-fund --no-audit
+
 # Permissions must be set in the same layer as npm ci: a separate chown/chmod
 # layer would store a full second copy of node_modules (~660MB each).
 # chgrp 0 + g=u supports OpenShift restricted-v2 (arbitrary UID, always gid 0)

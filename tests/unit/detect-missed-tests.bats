@@ -6,7 +6,8 @@ FIXTURES="$REPO_ROOT/tests/unit/fixtures/detect-missed-tests"
 SCRIPT="$REPO_ROOT/detect-missed-tests.sh"
 
 setup() {
-  export TMP_DIR="$(mktemp -d)"
+  TMP_DIR="$(mktemp -d)"
+  export TMP_DIR
   mkdir -p "$TMP_DIR/allure-results"
   export TEST_PASSED_COUNT=1
   export TEST_FAILED_COUNT=0

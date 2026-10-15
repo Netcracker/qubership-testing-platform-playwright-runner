@@ -58,7 +58,7 @@ _run_file_details() {
     run _run_calculate
     [ "$status" -eq 0 ]
     echo "$output" | grep -q '✅ PASSED | Single Test'
-    ! echo "$output" | grep -qi 'retry'
+    [[ "${output,,}" != *retry* ]]
 }
 
 @test "two-tests counts distinct historyIds separately" {
@@ -77,7 +77,7 @@ _run_file_details() {
     echo "$output" | grep -q '^FAILED | e2e/profile.spec.ts$'
     echo "$output" | grep -q '^PASSED | e2e/login.spec.ts$'
     echo "$output" | grep -q '^PASSED | e2e/search.spec.ts$'
-    ! echo "$output" | grep -q 'Backend.Users.getProfile'
+    [[ "$output" != *Backend.Users.getProfile* ]]
     [ "$(echo "$output" | grep -Ec '^(PASSED|FAILED) \| ')" -eq 4 ]
 }
 
@@ -86,14 +86,14 @@ _run_file_details() {
     run _run_file_details
     [ "$status" -eq 0 ]
     echo "$output" | grep -q '^PASSED | tests/TestScenario/foo.test.ts$'
-    ! echo "$output" | grep -q '\.\./'
+    [[ "$output" != *'../'* ]]
 }
 
 @test "file details omit TagHelper wrapper paths that are not specs" {
     _copy_fixture tag-helper-only
     run _run_file_details
     [ "$status" -eq 0 ]
-    ! echo "$output" | grep -q 'Engine/Shared/TagHelper.ts'
+    [[ "$output" != *Engine/Shared/TagHelper.ts* ]]
     [ "$(echo "$output" | grep -Ec '^(PASSED|FAILED) \| ')" -eq 0 ]
 }
 
@@ -106,6 +106,6 @@ _run_file_details() {
     [ "$status" -eq 0 ]
     echo "$output" | grep -q '^PASSED | tests/TestScenario/simplePlaywrightBrowserLaunchSanity.test.ts$'
     echo "$output" | grep -q '^PASSED | tests/TestScenario/simplePlaywrightEnvConfiguration.test.ts$'
-    ! echo "$output" | grep -q 'Engine/Shared/TagHelper.ts'
+    [[ "$output" != *Engine/Shared/TagHelper.ts* ]]
     [ "$(echo "$output" | grep -Ec '^(PASSED|FAILED) \| ')" -eq 2 ]
 }
