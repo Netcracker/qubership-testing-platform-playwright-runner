@@ -47,9 +47,17 @@ echo "🚀 Starting test execution workflow..."
 # shellcheck disable=SC2034
 NATIVE_REPORT_DIR="playwright-report"
 
+# Log ephemeral disk usage at exit (success or failure) to tune EPHEMERAL_STORAGE_* limits.
 # finalize_once() is defined in error-handler.sh (sourced above).
 # Register it here after all scripts are sourced so every function it calls is available.
 trap 'finalize_once' EXIT
+
+# Log ephemeral disk usage (tune EPHEMERAL_STORAGE_* from this). Runs as the first step
+# of the trap-independent path; a trailing `du` on each exit is not reachable because
+# finalize_once always exits 0, so it is printed right after the test run instead.
+log_disk_usage() {
+    echo "Disk usage: tmp=$(du -sh "${TMP_DIR:-/tmp}" 2>/dev/null | cut -f1) app=$(du -sh /app 2>/dev/null | cut -f1) project=$(du -sh "${PROJECT_DIR:${TMP_DIR:-/tmp}}" 2>/dev/null | cut -f1)"
+}
 
 init_environment              || fail "Environment initialization failed"
 parse_extra_vars              || fail "EXTRA_VARS parsing failed"
@@ -59,5 +67,6 @@ setup_runtime_environment     || fail "Runtime setup failed"
 start_upload_monitoring
 push_metrics_start || true
 run_tests                     || fail "Test runner failed"
+log_disk_usage
 
 echo "✅ Test job finished successfully!"

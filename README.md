@@ -103,6 +103,10 @@ Supported 2 profiles: `dev`, `prod`.
 | MEMORY_LIMIT   | 2000Mi | 3000Mi |
 | CPU_REQUEST    | 100m   | 100m   |
 | CPU_LIMIT      | 500m   | 1000m  |
+| EPHEMERAL_STORAGE_REQUEST | 2Gi | 2Gi |
+| EPHEMERAL_STORAGE_LIMIT   | 5Gi | 5Gi |
+
+`EPHEMERAL_STORAGE_*` bound the node-local disk used by the runner pod (writable layer, `/tmp`, git clone, `node_modules` copy, Playwright videos/traces/screenshots). Requests make the scheduler place the pod only on nodes with that free space. Exceeding the limit evicts only this pod (the test run fails), instead of the node entering `DiskPressure`. Image layers are not counted here. Tune the limit from the `Disk usage` line logged at the end of each run.
 
 ## Playwright Native Report (Trace Configuration)
 
