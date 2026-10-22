@@ -79,6 +79,8 @@ spec:
             value: "{{ .Values.DEBUG_MODE }}"
           - name: PLAYWRIGHT_TRACE_MODE
             value: "{{ .Values.PLAYWRIGHT_TRACE_MODE }}"
+          - name: ATP_ORCHESTRATOR_URL
+            value: "{{ .Values.ATP_ORCHESTRATOR_URL }}"
           - name: TEST_PARAMS
             value: {{ toJson .Values.TEST_PARAMS | quote }}
           - name: EXTRA_VARS
