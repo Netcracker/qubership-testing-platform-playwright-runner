@@ -32,7 +32,7 @@
     "allure-playwright": "3.6.0",
     "archiver": "^8.0.0",
     "axios": "1.20.0",
-    "bats": "1.11.1",
+    "bats": "^1.13.0",
     "consul": "2.0.1",
     "cross-env": "^10.1.0",
     "csv-parse": "6.0.0",
