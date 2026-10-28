@@ -79,8 +79,6 @@ spec:
             value: "{{ .Values.DEBUG_MODE }}"
           - name: PLAYWRIGHT_TRACE_MODE
             value: "{{ .Values.PLAYWRIGHT_TRACE_MODE }}"
-          - name: ATP_ORCHESTRATOR_URL
-            value: "{{ .Values.ATP_ORCHESTRATOR_URL }}"
           - name: CLUSTER_NAME
             value: "{{ .Values.CLUSTER_NAME }}"
           - name: TEST_PARAMS
