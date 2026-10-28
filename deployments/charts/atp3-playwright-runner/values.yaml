@@ -42,9 +42,7 @@ AFFINITY: {}
 TOLERATIONS: []
 # Variables for render environment configuration template
 CLOUD_PROTOCOL: ""
-CLOUD_PUBLIC_HOST: ""
-ATP_ORCHESTRATOR_URL: ""
-# Optional. Include the trailing underscore (e.g. "atp3dev_"); empty = derive from ATP_ORCHESTRATOR_URL
+# Optional cluster name, no dashes (e.g. "atp3dev"). Result folder = <CLUSTER_NAME>-<ENVIRONMENT_NAME>; empty = <ENVIRONMENT_NAME>
 CLUSTER_NAME: ""
 DEFAULT_TENANT_NAME: ""
 DEFAULT_TENANT_ADMIN_LOGIN: ""
