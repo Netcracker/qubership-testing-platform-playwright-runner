@@ -59,6 +59,7 @@
     "write-excel-file": "4.1.1"
   },
   "dependencies": {
+    "@google-cloud/storage": "^8.1.0",
     "@kubernetes/client-node": "1.4.0",
     "@types/node-fetch": "2.6.12",
     "@usebruno/cli": "3.5.3",
