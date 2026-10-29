@@ -57,10 +57,12 @@ RUN npm install -g npm@11.19.0 --no-fund --no-audit
 # chgrp 0 + g=u supports OpenShift restricted-v2 (arbitrary UID, always gid 0)
 # while Kubernetes can still run the container as USER 1007 via owner perms.
 # Group-writable /etc/passwd lets the entrypoint register the arbitrary UID.
+# Microsoft Edge is not bundled in the official Playwright Docker image.
 RUN npm set strict-ssl=false && \
     npm init -y && \
     npm ci && \
-    rm -rf "$HOME_EX/.npm" && \
+    npx playwright install msedge && \
+    rm -rf /var/lib/apt/lists/* "$HOME_EX/.npm" && \
     chown -R runner:runner "$HOME_EX" && \
     chgrp -R 0 /app /scripts && \
     chmod -R g=u /app /scripts && \
