@@ -79,6 +79,8 @@ spec:
             value: "{{ .Values.DEBUG_MODE }}"
           - name: PLAYWRIGHT_TRACE_MODE
             value: "{{ .Values.PLAYWRIGHT_TRACE_MODE }}"
+          - name: CLUSTER_NAME
+            value: "{{ .Values.CLUSTER_NAME }}"
           - name: TEST_PARAMS
             value: {{ toJson .Values.TEST_PARAMS | quote }}
           - name: EXTRA_VARS
