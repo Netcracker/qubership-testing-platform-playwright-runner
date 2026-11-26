@@ -1,5 +1,5 @@
-# Rebuild s5cmd with patched Go (Xray: github.com/golang/go 1.22.10 -> 1.26.6).
-FROM golang:1.26.6-bookworm AS s5cmd
+# Rebuild s5cmd with patched Go (Xray: github.com/golang/go -> 1.26.11).
+FROM golang:1.26.11-bookworm AS s5cmd
 RUN git clone --depth 1 --branch v2.3.0 https://github.com/peak/s5cmd.git /src
 WORKDIR /src
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o /s5cmd .
@@ -50,7 +50,7 @@ COPY --chown=runner:runner --chmod=755 capture-test-list.sh /app/capture-test-li
 # alongside node_modules: see its comment for why.
 COPY packages/ ./packages/
 
-RUN npm install -g npm@11.19.0 --no-fund --no-audit
+RUN npm install -g npm@11.21.3 --no-fund --no-audit
 
 # Permissions must be set in the same layer as npm ci: a separate chown/chmod
 # layer would store a full second copy of node_modules (~660MB each).
